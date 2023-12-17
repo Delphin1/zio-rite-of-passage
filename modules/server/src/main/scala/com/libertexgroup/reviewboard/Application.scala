@@ -2,6 +2,7 @@ package com.libertexgroup.reviewboard
 
 import com.libertexgroup.reviewboard.http.HttpApi
 import com.libertexgroup.reviewboard.http.controllers.*
+import com.libertexgroup.reviewboard.servcies.CompanyService
 import sttp.tapir.*
 import sttp.tapir.server.ziohttp.*
 import zio.*
@@ -19,7 +20,8 @@ object Application extends ZIOAppDefault {
   } yield ()
 
   override def run  = serverProgram.provide(
-    Server.default
+    Server.default,
+    CompanyService.dummyLayer
   ) // Console.printLine("Hello world!")
 
 }

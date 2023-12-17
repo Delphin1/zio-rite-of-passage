@@ -2,6 +2,7 @@ package com.libertexgroup.reviewboard.http.controllers
 
 import com.libertexgroup.reviewboard.domain.data.Company
 import com.libertexgroup.reviewboard.http.requests.CreateCompanyRequest
+import com.libertexgroup.reviewboard.servcies.CompanyService
 import sttp.client3.testing.SttpBackendStub
 import sttp.monad.MonadError
 import sttp.client3.*
@@ -16,6 +17,26 @@ import com.libertexgroup.reviewboard.syntax.assert
 object CompanyControllerSpec extends ZIOSpecDefault {
 
   private given zioME: MonadError[Task] = new RIOMonadError[Any]
+
+  private val testCompany = Company(1, "test-test", "Test test", "test.com")
+  private val serviceStab = new CompanyService {
+    override def create(req: CreateCompanyRequest): Task[Company] =
+      ZIO.succeed(testCompany)
+
+    override def getBySlag(slug: String): Task[Option[Company]] =
+      ZIO.succeed{
+        if (slug == testCompany.slug) Some(testCompany)
+        else None
+      }
+
+    override def getAll: Task[List[Company]] = ZIO.succeed(List(testCompany))
+
+    override def getById(id: Long): Task[Option[Company]] =
+      ZIO.succeed{
+          if (id == 1) Some(testCompany)
+          else None
+      }
+  }
 
   private def backendStubZIO(endpointFun: CompanyController => ServerEndpoint[Any, Task]) = for {
     // create the controller
@@ -58,7 +79,7 @@ object CompanyControllerSpec extends ZIOSpecDefault {
         program.assert { respBody =>
             respBody.toOption
               .flatMap(_.fromJson[List[Company]].toOption) //Option[Company]
-              .contains(List())
+              .contains(List(testCompany))
         }
       },
 
@@ -73,7 +94,7 @@ object CompanyControllerSpec extends ZIOSpecDefault {
         program.assert { respBody =>
             respBody.toOption
               .flatMap(_.fromJson[Company].toOption)
-              .isEmpty
+              .contains(testCompany)
           }
       },
 
@@ -83,5 +104,6 @@ object CompanyControllerSpec extends ZIOSpecDefault {
                   )
       }
     )
+      .provide(ZLayer.succeed(serviceStab))
 }
 

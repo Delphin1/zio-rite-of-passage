@@ -2,34 +2,33 @@ package com.libertexgroup.reviewboard.http.controllers
 
 import com.libertexgroup.reviewboard.domain.data.Company
 import com.libertexgroup.reviewboard.http.endpoints.CompanyEndpoints
+import com.libertexgroup.reviewboard.servcies.CompanyService
 import sttp.tapir.server.ServerEndpoint
 import zio.*
 
 import collection.mutable
 
-class CompanyController extends BaseController with CompanyEndpoints {
-  // TODO implementation
-  val db: mutable.Map[Long, Company] = mutable.Map[Long, Company](
-//    -1L -> Company(-1L, "invalid", "No Company", "nothing.com")
-  )
+class CompanyController private (service: CompanyService) extends BaseController with CompanyEndpoints {
+
 
   //create
   val create: ServerEndpoint[Any, Task]= createEndpoint.serverLogicSuccess { req =>
-    ZIO.succeed{
-      val newId = db.keys.maxOption.getOrElse(0L) + 1
-      val newCompany = req.toCompany(newId)
-      db += (newId -> newCompany)
-      newCompany
-    }
+    service.create(req)
   }
 
   val getAll: ServerEndpoint[Any, Task] =
-    getAllEndpoint.serverLogicSuccess(_ => ZIO.succeed(db.values.toList))
+    getAllEndpoint.serverLogicSuccess { _ =>
+      service.getAll
+    }
 
   val getById: ServerEndpoint[Any, Task] = getByIdEndpoint.serverLogicSuccess { id =>
     ZIO
       .attempt(id.toLong)
-      .map(db.get)
+      .flatMap(service.getById)
+      .catchSome {
+        case _: NumberFormatException =>
+          service.getBySlag(id)
+      }
   }
 
 
@@ -38,5 +37,7 @@ class CompanyController extends BaseController with CompanyEndpoints {
 
 
 object CompanyController {
-  val makeZIO: ZIO[Any, Nothing, CompanyController] = ZIO.succeed(new CompanyController)
+  val makeZIO = for {
+    service <- ZIO.service[CompanyService]
+  } yield new CompanyController(service)
 }

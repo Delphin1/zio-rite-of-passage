@@ -37,7 +37,7 @@ val dependencies = Seq(
   "dev.zio"                       %% "zio-config-magnolia"               % zioConfigVersion,
   "dev.zio"                       %% "zio-config-typesafe"               % zioConfigVersion,
   "io.getquill"                   %% "quill-jdbc-zio"                    % "4.7.3",
-  "org.postgresql"                 % "postgresql"                        % "42.5.0",
+  "org.postgresql"                 % "postgresql"                        % "42.7.1",
   "org.flywaydb"                   % "flyway-core"                       % "9.7.0",
   "io.github.scottweaver"         %% "zio-2-0-testcontainers-postgresql" % "0.9.0",
   "dev.zio"                       %% "zio-prelude"                       % "1.0.0-RC16",

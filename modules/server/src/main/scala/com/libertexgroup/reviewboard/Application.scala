@@ -2,7 +2,9 @@ package com.libertexgroup.reviewboard
 
 import com.libertexgroup.reviewboard.http.HttpApi
 import com.libertexgroup.reviewboard.http.controllers.*
-import com.libertexgroup.reviewboard.servcies.CompanyService
+import com.libertexgroup.reviewboard.servcies.*
+import com.libertexgroup.reviewboard.repositories.*
+import com.libertexgroup.reviewboard.repositories.Repository.dataLayer
 import sttp.tapir.*
 import sttp.tapir.server.ziohttp.*
 import zio.*
@@ -21,7 +23,13 @@ object Application extends ZIOAppDefault {
 
   override def run  = serverProgram.provide(
     Server.default,
-    CompanyService.dummyLayer
+    // services
+    CompanyServiceLive.layer,
+    //repos
+    CompanyRepositoryLive.layer,
+    // other requirements
+    dataLayer
+    //CompanyService.dummyLayer
   ) // Console.printLine("Hello world!")
 
 }

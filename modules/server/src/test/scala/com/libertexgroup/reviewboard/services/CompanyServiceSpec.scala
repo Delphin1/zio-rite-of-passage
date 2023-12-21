@@ -13,7 +13,7 @@ object CompanyServiceSpec extends ZIOSpecDefault {
 
   val service: ZIO.ServiceWithZIOPartiallyApplied[CompanyService] = ZIO.serviceWithZIO[CompanyService]
   //val companyZIO: ZIO[CompanyService, Throwable, Company] = service(_.create(???))
-  val stubRepoLayer = ZLayer.succeed(
+  val stubRepoLayer: ULayer[CompanyRepository] = ZLayer.succeed(
     new CompanyRepository {
       val db: mutable.Map[Long, Company] = collection.mutable.Map[Long, Company]()
 

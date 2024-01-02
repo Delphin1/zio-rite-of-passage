@@ -6,9 +6,10 @@ import zio.*
 import javax.sql.DataSource
 
 trait RepositorySpec {
+  val initScript: String
   private def createContainer(): PostgreSQLContainer[Nothing] = {
     val container: PostgreSQLContainer[Nothing] =
-      PostgreSQLContainer("postgres").withInitScript("sql/companies.sql") // src/test/resources
+      PostgreSQLContainer("postgres").withInitScript(initScript) // src/test/resources
     container.start()
     container
   }
@@ -23,7 +24,7 @@ trait RepositorySpec {
   }
 
   // use the DataSource to build th Quill instance as a ZLayer
-  val dataSourceLayer = ZLayer {
+  val dataSourceLayer: ZLayer[Any with Scope, Throwable, DataSource] = ZLayer {
     for {
       container <- ZIO.acquireRelease(ZIO.attempt(createContainer()))(container =>
         ZIO.attempt(container.stop()).ignoreLogged

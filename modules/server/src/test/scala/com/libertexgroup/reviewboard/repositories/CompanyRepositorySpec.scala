@@ -18,6 +18,8 @@ object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec {
   private def genString(): String =
     scala.util.Random.alphanumeric.take(8).mkString
 
+  override val initScript: String = "sql/companies.sql"  
+
   private def genCompany(): Company =
     Company(
       id = -1L,

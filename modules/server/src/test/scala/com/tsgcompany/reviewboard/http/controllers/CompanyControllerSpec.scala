@@ -1,8 +1,5 @@
 package com.tsgcompany.reviewboard.http.controllers
 
-import com.tsgcompany.reviewboard.domain.data.Company
-import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
-import com.tsgcompany.reviewboard.servcies.CompanyService
 import sttp.client3.testing.SttpBackendStub
 import sttp.monad.MonadError
 import sttp.client3.*
@@ -13,7 +10,11 @@ import sttp.tapir.server.ServerEndpoint
 import zio.*
 import zio.test.*
 import zio.json.*
+
 import com.tsgcompany.reviewboard.syntax.assert
+import com.tsgcompany.reviewboard.domain.data.Company
+import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
+import com.tsgcompany.reviewboard.servcies.CompanyService
 object CompanyControllerSpec extends ZIOSpecDefault {
 
   private given zioME: MonadError[Task] = new RIOMonadError[Any]

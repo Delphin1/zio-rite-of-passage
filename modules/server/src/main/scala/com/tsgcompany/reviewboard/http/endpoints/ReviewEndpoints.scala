@@ -5,10 +5,10 @@ import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
 import sttp.tapir.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
-trait ReviewEndpoints {
+trait ReviewEndpoints extends BaseEndpoint {
   // post /review { CreateReviewRequest} - create review
   // return a Review
-  val createEnpoint = endpoint
+  val createEnpoint = baseEndpoint
     .tag("Reviews")
     .name("create")
     .description("Add a review for a company")
@@ -19,7 +19,7 @@ trait ReviewEndpoints {
 
   //get /reviews/id - get review by id
   // return Option[Review]
-  val getByIdEnpoint = endpoint
+  val getByIdEnpoint = baseEndpoint
     .tag("Reviews")
     .name("getById")
     .description("Get a review by its id")
@@ -29,7 +29,7 @@ trait ReviewEndpoints {
 
   // get /reviews/company/id - get review by company id
   // return List[Review]
-  val getByCompanyIdEnpoint = endpoint
+  val getByCompanyIdEnpoint = baseEndpoint
     .tag("Reviews")
     .name("getByCompanyId")
     .description("Get a review for a company")

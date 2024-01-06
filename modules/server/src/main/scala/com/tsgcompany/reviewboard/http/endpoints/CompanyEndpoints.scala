@@ -5,9 +5,9 @@ import com.tsgcompany.reviewboard.http.requests.*
 import sttp.tapir.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
-trait CompanyEndpoints {
+trait CompanyEndpoints extends BaseEndpoint {
     val createEndpoint =
-      endpoint
+      baseEndpoint
         .tag("companies")
         .name("create")
         .description("Create a listg for a company")
@@ -16,7 +16,7 @@ trait CompanyEndpoints {
         .in(jsonBody[CreateCompanyRequest])
         .out(jsonBody[Company])
     val getAllEndpoint =
-      endpoint
+      baseEndpoint
         .tag("companies")
         .name("getAll")
         .description("get all company listings")
@@ -25,7 +25,7 @@ trait CompanyEndpoints {
         .out(jsonBody[List[Company]])
 
     val getByIdEndpoint =
-      endpoint
+      baseEndpoint
         .tag("companies")
         .name("getById")
         .description("get company by its id or more slag")

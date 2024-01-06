@@ -1,13 +1,24 @@
 package com.tsgcompany.reviewboard.http.controllers
 
-import com.tsgcompany.reviewboard.http.endpoints.HealthEndpoint
+
+import sttp.tapir.*
+import sttp.model.StatusCode
 import sttp.tapir.server.ServerEndpoint
 import zio.*
+
+import com.tsgcompany.reviewboard.domain.error.HttpError
+import com.tsgcompany.reviewboard.http.endpoints.HealthEndpoint
+
 
 class HealthController private extends BaseController with HealthEndpoint{
   val health = healthEndpoint
     .serverLogicSuccess[Task](_ => ZIO.succeed("All good!"))
-  override val routes: List[ServerEndpoint[Any, Task]] = List(health)
+
+  val errorRoute = errorEndpoint
+    .serverLogic[Task](_ => ZIO.fail(new RuntimeException("Boom!")).either
+    ) //Task[Either[Trowable,Sting]];
+
+  override val routes: List[ServerEndpoint[Any, Task]] = List(health, errorRoute)
 }
 
 object HealthController {

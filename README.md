@@ -10,3 +10,11 @@ export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address' | head -n 
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 ```
+
+For running testcontainers locally you need file `.env`
+```bash
+# For Colima and TestContainers working on MacOS
+DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
+```

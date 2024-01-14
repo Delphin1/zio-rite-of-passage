@@ -6,7 +6,7 @@ object Repository {
   def quillLayer = 
     Quill.Postgres.fromNamingStrategy(SnakeCase)
   def dataSourceLayer =
-    Quill.DataSource.fromPrefix("test.db")
+    Quill.DataSource.fromPrefix("tsgcompany.db")
     
   val dataLayer =
     dataSourceLayer >>> quillLayer  

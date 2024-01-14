@@ -78,6 +78,6 @@ object CompanyRepositoryDemo extends ZIOAppDefault {
   override def run: ZIO[Any, Throwable, Unit] = program.provide(
     CompanyRepositoryLive.layer,
     Quill.Postgres.fromNamingStrategy(SnakeCase), // quill instance
-    Quill.DataSource.fromPrefix("test.db")
+    Quill.DataSource.fromPrefix("tsgcompany.db")
   )
 }

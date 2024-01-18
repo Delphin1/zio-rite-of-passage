@@ -1,5 +1,6 @@
 package com.tsgcompany.reviewboard
 
+import com.tsgcompany.reviewboard.config.{Configs, JWTConfig}
 import com.tsgcompany.reviewboard.http.HttpApi
 import com.tsgcompany.reviewboard.http.controllers.*
 import com.tsgcompany.reviewboard.servcies.*
@@ -23,12 +24,17 @@ object Application extends ZIOAppDefault {
 
   override def run  = serverProgram.provide(
     Server.default,
+    // configs
+    Configs.makeConfigLayer[JWTConfig]("tsgcompany.jwt"),
     // services
     CompanyServiceLive.layer,
     ReviewServiceLive.layer,
+    UserServiceLive.layer,
+    JWTServiceLive.layer,
     //repos
     CompanyRepositoryLive.layer,
     ReviewRepositoryLive.layer,
+    UserRepositoryLive.layer,
     // other requirements
     dataLayer
     //CompanyService.dummyLayer

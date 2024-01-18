@@ -6,7 +6,7 @@ import sttp.model.StatusCode
 import sttp.tapir.server.ServerEndpoint
 import zio.*
 
-import com.tsgcompany.reviewboard.domain.error.HttpError
+import com.tsgcompany.reviewboard.domain.errors.HttpError
 import com.tsgcompany.reviewboard.http.endpoints.HealthEndpoint
 
 

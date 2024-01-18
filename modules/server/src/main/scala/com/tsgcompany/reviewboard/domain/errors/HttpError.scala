@@ -1,4 +1,4 @@
-package com.tsgcompany.reviewboard.domain.error
+package com.tsgcompany.reviewboard.domain.errors
 
 import sttp.model.StatusCode
 
@@ -12,6 +12,10 @@ object HttpError {
   def decode(tuple:(StatusCode, String)) =
     HttpError(tuple._1, tuple._2, new RuntimeException(tuple._2))
 
-  def encode(error: Throwable) =
-    (StatusCode.InternalServerError, error.getMessage)
+  def encode(error: Throwable) = error match {
+    case UnauthorizedException => (StatusCode.Unauthorized, error.getMessage)
+    // TODO: for different statuses
+    case _ => (StatusCode.InternalServerError, error.getMessage)
+  }
+    
 }

@@ -1,6 +1,6 @@
 package com.tsgcompany.reviewboard.http
 
-import com.tsgcompany.reviewboard.http.controllers.{BaseController, CompanyController, HealthController, ReviewController}
+import com.tsgcompany.reviewboard.http.controllers.*
 
 object HttpApi {
   def gatherRoutes(controllers: List[BaseController]) =
@@ -9,6 +9,7 @@ object HttpApi {
     health <- HealthController.makeZIO
     company <- CompanyController.makeZIO
     reviews <- ReviewController.makeZIO
+    users <- UserController.makeZIO
   } yield List(health, company)
   
   val endpointsZIO = makeController.map(gatherRoutes)

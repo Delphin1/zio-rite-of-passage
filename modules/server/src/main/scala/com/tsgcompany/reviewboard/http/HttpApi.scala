@@ -10,7 +10,7 @@ object HttpApi {
     company <- CompanyController.makeZIO
     reviews <- ReviewController.makeZIO
     users <- UserController.makeZIO
-  } yield List(health, company)
+  } yield List(health, company, reviews, users)
   
   val endpointsZIO = makeController.map(gatherRoutes)
 

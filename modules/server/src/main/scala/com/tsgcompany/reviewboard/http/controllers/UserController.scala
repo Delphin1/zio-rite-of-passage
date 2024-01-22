@@ -4,6 +4,7 @@ import com.tsgcompany.reviewboard.domain.data.UserId
 import zio.*
 import sttp.tapir.server.*
 import com.tsgcompany.reviewboard.domain.errors.*
+import com.tsgcompany.reviewboard.http.controllers.UserController.makeZIO
 import com.tsgcompany.reviewboard.http.endpoints.UserEndpoints
 import com.tsgcompany.reviewboard.http.requests.DeleteAccountRequest
 import com.tsgcompany.reviewboard.servcies.{JWTService, UserService}
@@ -50,6 +51,19 @@ class UserController private (userService: UserService, jwtService: JWTService) 
         userService.deleteUser(req.email, req.password)
           .map(user => UserResponse(user.email))
           .either
+      }
+
+  val forgotPassword =
+    forgotPasswordEndpoint
+      .serverLogic{ req =>
+        userService.sendPasswordRecoveryOTP(req.email).either
+      }
+
+  val recoverPassword =
+    recoverPasswordEndpoint
+      .serverLogic{ req =>
+        userService.recoverPasswordFromToken(req.email, req.token, req.newPassword)
+        .filterOrFail(b => b)(UnauthorizedException).unit.either
       }
 
   override val routes: List[ServerEndpoint[Any, Task]] = List(

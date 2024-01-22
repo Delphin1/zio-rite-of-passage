@@ -4,7 +4,7 @@ import zio.*
 
 import java.security.SecureRandom
 import com.tsgcompany.reviewboard.domain.data.*
-import com.tsgcompany.reviewboard.repositories.UserRepository
+import com.tsgcompany.reviewboard.repositories.*
 
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -16,9 +16,14 @@ trait UserService {
   def deleteUser(email: String, password: String): Task[User]
   // JWT
   def generateToken(email: String, password: String): Task[Option[UserToken]]
+  def sendPasswordRecoveryOTP(email: String): Task[Unit]
+  def recoverPasswordFromToken(email: String, token: String, newPassword: String): Task[Boolean]
 }
 
-class UserServiceLive private (jwtService: JWTService, userRepo: UserRepository) extends UserService {
+class UserServiceLive private (jwtService: JWTService,
+                               emailService: EmailService,
+                               userRepo: UserRepository,
+                               tokenRepo: RecoveryTokenRepository) extends UserService {
 
   override def registerUser(email: String, password: String): Task[User] =
     userRepo.create(
@@ -77,6 +82,22 @@ class UserServiceLive private (jwtService: JWTService, userRepo: UserRepository)
     } yield maybeToken
 
 
+  override def sendPasswordRecoveryOTP(email: String): Task[Unit] =
+    // get a token from the token Repo
+    // email the token to the email
+    tokenRepo.getToken(email).flatMap {
+      case Some(token) => emailService.sendPasswordRecovery(email, token)
+      case None => ZIO.unit
+    }
+
+  override def recoverPasswordFromToken(email: String, token: String, newPassword: String): Task[Boolean] =
+    for {
+      existingUser <- userRepo.getByEmail(email).someOrFail(new RuntimeException("Non-existent user"))
+      tokenIsValid <- tokenRepo.checkToken(email, token)
+      result <- userRepo.update(existingUser.id, user => user.copy(hashedPassword = UserServiceLive.Hasher.generateHash(newPassword)))
+        .when(tokenIsValid)
+        .map(_.nonEmpty)
+    } yield result
 }
 
 object UserServiceLive {
@@ -84,7 +105,9 @@ object UserServiceLive {
     for {
       jwtService <- ZIO.service[JWTService]
       userRepo <- ZIO.service[UserRepository]
-    } yield new UserServiceLive(jwtService, userRepo)
+      emailService <- ZIO.service[EmailService]
+      tokenRepo <- ZIO.service[RecoveryTokenRepository]
+    } yield new UserServiceLive(jwtService,  emailService, userRepo, tokenRepo)
   }
   object Hasher {
     // sting + salt + nIterations PBKDF2

@@ -25,16 +25,17 @@ object Application extends ZIOAppDefault {
   override def run  = serverProgram.provide(
     Server.default,
     // configs
-    Configs.makeConfigLayer[JWTConfig]("tsgcompany.jwt"),
     // services
     CompanyServiceLive.layer,
     ReviewServiceLive.layer,
     UserServiceLive.layer,
-    JWTServiceLive.layer,
+    JWTServiceLive.configuredLayer,
+    EmailServiceLive.layer,
     //repos
     CompanyRepositoryLive.layer,
     ReviewRepositoryLive.layer,
     UserRepositoryLive.layer,
+    RecoveryTokenRepositoryLive.configuredLayer,
     // other requirements
     dataLayer
     //CompanyService.dummyLayer

@@ -53,13 +53,13 @@ class UserController private (userService: UserService, jwtService: JWTService) 
           .either
       }
 
-  val forgotPassword =
+  val forgotPassword: ServerEndpoint[Any, Task] =
     forgotPasswordEndpoint
       .serverLogic{ req =>
         userService.sendPasswordRecoveryOTP(req.email).either
       }
 
-  val recoverPassword =
+  val recoverPassword: ServerEndpoint[Any, Task] =
     recoverPasswordEndpoint
       .serverLogic{ req =>
         userService.recoverPasswordFromToken(req.email, req.token, req.newPassword)
@@ -70,7 +70,9 @@ class UserController private (userService: UserService, jwtService: JWTService) 
     create,
     updatePassword,
     delete,
-    login
+    login,
+    forgotPassword,
+    recoverPassword
   )
 }
 

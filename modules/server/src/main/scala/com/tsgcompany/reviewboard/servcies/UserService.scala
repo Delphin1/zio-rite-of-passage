@@ -112,7 +112,7 @@ object UserServiceLive {
   object Hasher {
     // sting + salt + nIterations PBKDF2
     //
-    "1000:AAAAA:BBBB"
+    // "1000:AAAAA:BBBB"
     private val PBKDF2_ITERATIONS: Int = 1000
     private val SALT_BYTE_SIZE: Int = 24
     private val PBKDF2_ALGORITHM: String = "PBKDF2WithHmacSHA512"

@@ -1,6 +1,6 @@
 package com.tsgcompany.reviewboard.integration
 
-import com.tsgcompany.reviewboard.config.JWTConfig
+import com.tsgcompany.reviewboard.config.{JWTConfig, RecoveryTokensConfig}
 import com.tsgcompany.reviewboard.domain.data.UserToken
 import com.tsgcompany.reviewboard.http.controllers.*
 import com.tsgcompany.reviewboard.http.requests.*
@@ -8,7 +8,7 @@ import com.tsgcompany.reviewboard.http.responses.UserResponse
 import com.tsgcompany.reviewboard.repositories.Repository.dataSourceLayer
 import com.tsgcompany.reviewboard.repositories.*
 import com.tsgcompany.reviewboard.servcies.*
-import sttp.client3.{basicRequest, SttpBackend, UriContext}
+import sttp.client3.{SttpBackend, UriContext, basicRequest}
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.Method
 import sttp.monad.MonadError
@@ -61,6 +61,11 @@ object UserFlowSpec extends ZIOSpecDefault with RepositorySpec {
       sendRequest(Method.POST, path, payload, None)
     def postAuthRequest[B: JsonCodec](path: String, payload: A, token: String): Task[Option[B]] =
       sendRequest(Method.POST, path, payload, Some(token))
+    def postNoResponse(path: String, payload: A): Task[Unit] =
+      basicRequest
+        .method(Method.POST, uri"$path")
+        .body(payload.toJson)
+        .send(backend).unit
     def putRequest[B: JsonCodec](path: String, payload: A): Task[Option[B]] =
       sendRequest(Method.PUT, path, payload, None)
     def putAuthRequest[B: JsonCodec](path: String, payload: A, token: String): Task[Option[B]] =
@@ -70,6 +75,18 @@ object UserFlowSpec extends ZIOSpecDefault with RepositorySpec {
     def deleteAuthRequest[B: JsonCodec](path: String, payload: A, token: String): Task[Option[B]] =
       sendRequest(Method.DELETE, path, payload, Some(token))
   }
+
+  class EmailServiceProbe extends EmailService {
+    val db = collection.mutable.Map[String, String]()
+    override def sendEmail(to: String, subject: String, content: String): Task[Unit] = ZIO.unit
+    override def sendPasswordRecovery(to: String, token: String): Task[Unit] =
+      ZIO.succeed(db += (to -> token))
+    // specific to the test
+    def probeToken(email: String): Task[Option[String]] = ZIO.succeed(db.get(email))
+
+  }
+
+  val emailServiceLayer: ZLayer[Any, Nothing, EmailServiceProbe] = ZLayer.succeed(new EmailServiceProbe)
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("UserFlowSpec")(
@@ -123,14 +140,36 @@ object UserFlowSpec extends ZIOSpecDefault with RepositorySpec {
         } yield assertTrue(
           maybeOldUser.filter(_.email == userEmail).nonEmpty && maybeUser.isEmpty
         )
-      }
+      },
+      test("recovey password flow")(
+        for {
+          backendStub <- backendStubZIO
+          // register a user
+          _ <- backendStub.postRequest[RegisterUserAccount]("/users", RegisterUserAccount(userEmail, "test"))
+          // trigger recovery password flow
+          _ <- backendStub.postNoResponse("/users/forgot", ForgotPasswordRequest(userEmail))
+          emailServiceProbe <- ZIO.service[EmailServiceProbe]
+          token <- emailServiceProbe.probeToken(userEmail)
+            .someOrFail(new RuntimeException("token was NOT emailed"))
+          _ <- backendStub.postNoResponse("users/recover", RecoverPasswordRequest(userEmail, token, "newtest"))
+          maybeOldToken <- backendStub
+            .postRequest[UserToken]("/users/login", LoginRequest(userEmail, "test"))
+          maybeNewToken <- backendStub
+            .postRequest[UserToken]("/users/login", LoginRequest(userEmail, "newtest"))
+        } yield assertTrue(
+          maybeOldToken.isEmpty && maybeNewToken.nonEmpty
+        )
+      )
     ).provide(
       UserServiceLive.layer,
       JWTServiceLive.layer,
       UserRepositoryLive.layer,
+      RecoveryTokenRepositoryLive.layer,
+      emailServiceLayer,
       dataSourceLayer,
       Repository.quillLayer,
       ZLayer.succeed(JWTConfig("secret", 3600)),
+      ZLayer.succeed(RecoveryTokensConfig(24 * 3600)),
       Scope.default
     )
 

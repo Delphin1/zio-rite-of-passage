@@ -10,11 +10,11 @@ import sttp.tapir.server.ServerEndpoint
 import zio.*
 import zio.test.*
 import zio.json.*
-
 import com.tsgcompany.reviewboard.syntax.assert
-import com.tsgcompany.reviewboard.domain.data.Company
+import com.tsgcompany.reviewboard.domain.data.{Company, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
-import com.tsgcompany.reviewboard.servcies.CompanyService
+import com.tsgcompany.reviewboard.servcies.{CompanyService, JWTService}
+import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
 object CompanyControllerSpec extends ZIOSpecDefault {
 
   private given zioME: MonadError[Task] = new RIOMonadError[Any]
@@ -39,6 +39,14 @@ object CompanyControllerSpec extends ZIOSpecDefault {
       }
   }
 
+  private val jwtServiceStub = new JWTService {
+    override def createToken(user: User): Task[UserToken] =
+      ZIO.succeed(UserToken(user.email, "BIG ACCESS", Long.MaxValue))
+
+    override def verifyToken(token: String): Task[UserId] =
+      ZIO.succeed(UserId(tsgUser.id, tsgUser.email))
+  }
+
   private def backendStubZIO(endpointFun: CompanyController => ServerEndpoint[Any, Task]) = for {
     // create the controller
     controller <- CompanyController.makeZIO
@@ -57,6 +65,7 @@ object CompanyControllerSpec extends ZIOSpecDefault {
           response <- basicRequest
             .post(uri"/companies")
             .body(CreateCompanyRequest("Test test", "test.com").toJson)
+            .header("Authorization","Bearer BIG ACCESS")
             .send(backendStub)
         } yield response.body
 
@@ -105,6 +114,9 @@ object CompanyControllerSpec extends ZIOSpecDefault {
                   )
       }
     )
-      .provide(ZLayer.succeed(serviceStab))
+      .provide(
+        ZLayer.succeed(serviceStab),
+        ZLayer.succeed(jwtServiceStub)
+      )
 }
 

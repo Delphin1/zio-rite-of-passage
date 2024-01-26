@@ -7,7 +7,7 @@ import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
 trait CompanyEndpoints extends BaseEndpoint {
     val createEndpoint =
-      baseEndpoint
+      secureBaseEndpoint
         .tag("companies")
         .name("create")
         .description("Create a listg for a company")

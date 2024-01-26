@@ -1,8 +1,8 @@
 package com.tsgcompany.reviewboard.services
 
 import com.tsgcompany.reviewboard.domain.data.{User, UserId, UserToken}
-import com.tsgcompany.reviewboard.repositories.UserRepository
-import com.tsgcompany.reviewboard.servcies.{JWTService, UserService, UserServiceLive}
+import com.tsgcompany.reviewboard.repositories.{RecoveryTokenRepository, UserRepository}
+import com.tsgcompany.reviewboard.servcies.{EmailService, JWTService, UserService, UserServiceLive}
 import zio.*
 import zio.test.*
 
@@ -40,6 +40,30 @@ object UserServiceSpec extends ZIOSpecDefault{
           user
         }
 
+    }
+  }
+
+  val stubTokenRepoLayer = ZLayer.succeed {
+    new RecoveryTokenRepository {
+      val db = collection.mutable.Map[String, String]()
+
+      override def getToken(email: String): Task[Option[String]] =
+        ZIO.attempt{
+          val token = util.Random.alphanumeric.take(8).mkString.toUpperCase()
+          db += (email -> token)
+          Some(token)
+        }
+        
+      override def checkToken(email: String, token: String): Task[Boolean] =
+        ZIO.succeed(db.get(email).filter(_ == token).nonEmpty)
+    }
+  }
+
+  val stubEmailLayer = ZLayer.succeed {
+    new EmailService {
+      override def sendEmail(to: String, subject: String, content: String): Task[Unit] = ZIO.unit
+
+      override def sendPasswordRecovery(to: String, token: String): Task[Unit] = ZIO.unit
     }
   }
 
@@ -108,6 +132,8 @@ object UserServiceSpec extends ZIOSpecDefault{
     ).provide(
       stubRepoLayer,
       stubJwtLayer,
+      stubEmailLayer,
+      stubTokenRepoLayer,
       UserServiceLive.layer
     )
 }

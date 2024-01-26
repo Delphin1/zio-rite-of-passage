@@ -10,11 +10,12 @@ import sttp.tapir.server.ServerEndpoint
 import zio.*
 import zio.test.*
 import zio.json.*
-import java.time.Instant
 
-import com.tsgcompany.reviewboard.domain.data.Review
+import java.time.Instant
+import com.tsgcompany.reviewboard.domain.data.{Review, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
-import com.tsgcompany.reviewboard.servcies.ReviewService
+import com.tsgcompany.reviewboard.servcies.{JWTService, ReviewService}
+import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
 import com.tsgcompany.reviewboard.syntax.assert
 
 
@@ -35,6 +36,14 @@ object ReviewControllerSpec extends ZIOSpecDefault {
     created = Instant.now(),
     updated = Instant.now()
   )
+
+  private val jwtServiceStub = new JWTService {
+    override def createToken(user: User): Task[UserToken] =
+      ZIO.succeed(UserToken(user.email, "BIG ACCESS", Long.MaxValue))
+
+    override def verifyToken(token: String): Task[UserId] =
+      ZIO.succeed(UserId(tsgUser.id, tsgUser.email))
+  }
 
   private def backendStubZIO(endpointFun: ReviewController => ServerEndpoint[Any, Task]) = for {
     // create the controller
@@ -84,6 +93,7 @@ object ReviewControllerSpec extends ZIOSpecDefault {
               wouldRecommend = 10,
               review = "all good"
             ).toJson)
+            .header("Authorization","Bearer BIG ACCESS")
             .send(backendStub)
         } yield assertTrue(
           response.body.toOption.flatMap(_.fromJson[Review].toOption).contains(goodReview)
@@ -130,6 +140,9 @@ object ReviewControllerSpec extends ZIOSpecDefault {
       }
 
     )
-      .provide(ZLayer.succeed(serviceStub))
+      .provide(
+        ZLayer.succeed(serviceStub),
+        ZLayer.succeed(jwtServiceStub)
+      )
 
 }

@@ -8,7 +8,7 @@ import sttp.tapir.generic.auto.*
 trait ReviewEndpoints extends BaseEndpoint {
   // post /review { CreateReviewRequest} - create review
   // return a Review
-  val createEnpoint = baseEndpoint
+  val createEnpoint = secureBaseEndpoint
     .tag("Reviews")
     .name("create")
     .description("Add a review for a company")

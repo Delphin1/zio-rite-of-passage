@@ -5,8 +5,7 @@ import com.raquo.laminar.codecs.StringAsIsCodec
 import frontroute.*
 import org.scalajs.dom
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.*
+import com.tsgcompany.reviewboard.common.*
 
 object Header {
   def apply() =
@@ -44,16 +43,14 @@ object Header {
           )
         )
       )
-  @js.native
-  @JSImport("/static/img/fiery-lava 128x128.png", JSImport.Default)
-  private val logoImage: String = js.native
+
   private def renderLogo() =
     a(
       href := "/",
       cls := "navbar-brand",
       img(
         cls := "home-logo",
-        src := logoImage,
+        src := Constants.logoImage,
         alt := "Rock the JVM"
       )
 
@@ -72,11 +69,3 @@ object Header {
 
 }
 
-object Anchors {
-  def renderNavLink(text: String, location: String, cssClass: String = "") =
-    a(
-      href := location,
-      cls := cssClass,
-      text
-    )
-}

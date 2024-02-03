@@ -1,8 +1,8 @@
 package com.tsgcompany.reviewboard.http.controllers
 
 import com.tsgcompany.reviewboard.domain.data.{Company, UserId}
-import com.tsgcompany.reviewboard.http.endpoints.CompanyEndpoints
 import com.tsgcompany.reviewboard.servcies.{CompanyService, JWTService}
+import com.tsgcompany.reviewboard.http.endpoints.*
 import sttp.tapir.server.ServerEndpoint
 import zio.*
 

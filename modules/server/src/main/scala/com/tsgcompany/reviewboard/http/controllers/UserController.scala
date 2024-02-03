@@ -4,13 +4,11 @@ import com.tsgcompany.reviewboard.domain.data.UserId
 import zio.*
 import sttp.tapir.server.*
 import com.tsgcompany.reviewboard.domain.errors.*
-import com.tsgcompany.reviewboard.http.controllers.UserController.makeZIO
-import com.tsgcompany.reviewboard.http.endpoints.UserEndpoints
-import com.tsgcompany.reviewboard.http.requests.DeleteAccountRequest
 import com.tsgcompany.reviewboard.servcies.{JWTService, UserService}
-import com.tsgcompany.reviewboard.http.responses.UserResponse
 import sttp.tapir.auth
-import sttp.tapir.server.ServerEndpoint.Full
+import sttp.tapir.server.ServerEndpoint
+import com.tsgcompany.reviewboard.http.endpoints.UserEndpoints
+import com.tsgcompany.reviewboard.http.responses.UserResponse
 
 
 class UserController private (userService: UserService, jwtService: JWTService) extends BaseController with UserEndpoints {

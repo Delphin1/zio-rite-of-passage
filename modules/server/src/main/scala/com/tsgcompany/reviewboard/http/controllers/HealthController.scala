@@ -6,8 +6,9 @@ import sttp.model.StatusCode
 import sttp.tapir.server.ServerEndpoint
 import zio.*
 
+import com.tsgcompany.reviewboard.http.endpoints.*
+
 import com.tsgcompany.reviewboard.domain.errors.HttpError
-import com.tsgcompany.reviewboard.http.endpoints.HealthEndpoint
 
 
 class HealthController private extends BaseController with HealthEndpoint{

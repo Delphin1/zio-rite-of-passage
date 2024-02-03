@@ -1,5 +1,6 @@
 package com.tsgcompany.reviewboard.repositories
 
+import io.getquill.autoQuote
 import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
 import zio.*

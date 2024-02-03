@@ -3,10 +3,9 @@ package com.tsgcompany.reviewboard.http.endpoints
 import sttp.tapir.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
-
 import com.tsgcompany.reviewboard.domain.data.UserToken
 import com.tsgcompany.reviewboard.http.requests.*
-import com.tsgcompany.reviewboard.http.responses.UserResponse
+import com.tsgcompany.reviewboard.http.responses.*
 
 trait UserEndpoints extends BaseEndpoint
 { 

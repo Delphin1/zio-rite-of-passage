@@ -1,7 +1,7 @@
 package com.tsgcompany.reviewboard.http.endpoints
 
 import com.tsgcompany.reviewboard.domain.data.Review
-import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
+import com.tsgcompany.reviewboard.http.requests.*
 import sttp.tapir.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*

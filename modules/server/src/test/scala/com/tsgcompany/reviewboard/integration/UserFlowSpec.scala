@@ -3,7 +3,7 @@ package com.tsgcompany.reviewboard.integration
 import com.tsgcompany.reviewboard.config.{JWTConfig, RecoveryTokensConfig}
 import com.tsgcompany.reviewboard.domain.data.UserToken
 import com.tsgcompany.reviewboard.http.controllers.*
-import com.tsgcompany.reviewboard.http.requests.*
+import com.tsgcompany.reviewboard.http.requests.{DeleteAccountRequest, ForgotPasswordRequest, LoginRequest, RecoverPasswordRequest, RegisterUserAccount, UpdatePasswordRequest}
 import com.tsgcompany.reviewboard.http.responses.UserResponse
 import com.tsgcompany.reviewboard.repositories.Repository.dataSourceLayer
 import com.tsgcompany.reviewboard.repositories.*

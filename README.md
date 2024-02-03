@@ -18,3 +18,7 @@ DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
 ```
+
+sbt: ~fastOptJS
+npm run star
+

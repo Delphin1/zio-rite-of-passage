@@ -3,8 +3,8 @@ package com.tsgcompany.reviewboard.http.controllers
 import com.tsgcompany.reviewboard.domain.data.UserId
 import sttp.tapir.server.ServerEndpoint
 import zio.*
-import com.tsgcompany.reviewboard.http.endpoints.ReviewEndpoints
 import com.tsgcompany.reviewboard.servcies.{JWTService, ReviewService}
+import com.tsgcompany.reviewboard.http.endpoints.*
 
 
 class ReviewController private(reviewService: ReviewService, jwtService: JWTService) extends BaseController with ReviewEndpoints {

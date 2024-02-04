@@ -5,8 +5,12 @@ import com.raquo.laminar.api.L.{*, given}
 import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.components.Anchors
 import com.tsgcompany.reviewboard.domain.data.*
-import frontroute.*
-import org.scalajs.dom
+import com.tsgcompany.reviewboard.http.endpoints.CompanyEndpoints
+import sttp.client3.*
+import sttp.client3.impl.zio.FetchZioBackend
+import sttp.tapir.client.sttp.SttpClientInterpreter
+import zio.*
+
 object CompaniesPage {
   val simpleCompany = Company(
     1L,
@@ -19,32 +23,53 @@ object CompaniesPage {
     None,
     List("space", "scala")
   )
-    def apply() =
-        sectionTag(
-          cls := "section-1",
+  
+  val companiesBus = EventBus[List[Company]]()
+  def performBackendCall(): Unit = {
+      // fetch API
+      // AJAX
+      // ZIO endpoint
+      val companyEndpoints = new CompanyEndpoints {}
+      val theEndpoint = companyEndpoints.getAllEndpoint
+      val backend = FetchZioBackend()
+      val interpreter: SttpClientInterpreter = SttpClientInterpreter()
+      val request = interpreter
+        .toRequestThrowDecodeFailures(theEndpoint, Some(uri"http://localhost:8080"))
+        .apply(())
+      val companiesZIO = backend.send(request).map(_.body).absolve
+      // run the ZIO effect
+      Unsafe.unsafe { implicit unsafe =>
+        Runtime.default.unsafe.fork(
+          companiesZIO.tap(list => ZIO.attempt(companiesBus.emit(list)))
+        )
+      }
+  }
+  def apply() =
+    sectionTag(
+      onMountCallback(_ => performBackendCall()),
+      cls := "section-1",
+      div(
+        cls := "container company-list-hero",
+        h1(
+          cls := "company-list-title",
+          "Rock the JVM Companies Board"
+        )
+      ),
+      div(
+        cls := "container",
+        div(
+          cls := "row jvm-recent-companies-body",
           div(
-            cls := "container company-list-hero",
-            h1(
-              cls := "company-list-title",
-              "Rock the JVM Companies Board"
-            )
+            cls := "col-lg-4",
+            div("TODO filter panel here")
           ),
           div(
-            cls := "container",
-            div(
-              cls := "row jvm-recent-companies-body",
-              div(
-                cls := "col-lg-4",
-                div("TODO filter panel here")
-              ),
-              div(
-                cls := "col-lg-8",
-                renderCompany(simpleCompany),
-                renderCompany(simpleCompany)
-              )
-            )
+            cls := "col-lg-8",
+            children <-- companiesBus.events.map(_.map(renderCompany))
           )
         )
+      )
+    )
 
   private def renderCompanyPicture(company: Company) =
     img(
@@ -110,5 +135,4 @@ object CompaniesPage {
       ),
       renderAction(company)
     )
-
 }

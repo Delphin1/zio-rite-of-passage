@@ -1,12 +1,11 @@
 package com.tsgcompany.reviewboard
 
-import com.tsgcompany.reviewboard.config.{Configs, JWTConfig}
 import com.tsgcompany.reviewboard.http.HttpApi
-import com.tsgcompany.reviewboard.http.controllers.*
-import com.tsgcompany.reviewboard.servcies.*
 import com.tsgcompany.reviewboard.repositories.*
 import com.tsgcompany.reviewboard.repositories.Repository.dataLayer
+import com.tsgcompany.reviewboard.servcies.*
 import sttp.tapir.*
+import sttp.tapir.server.interceptor.cors.CORSInterceptor
 import sttp.tapir.server.ziohttp.*
 import zio.*
 import zio.http.Server
@@ -16,7 +15,9 @@ object Application extends ZIOAppDefault {
     endpoints <- HttpApi.endpointsZIO
     _  <- Server.serve(
         ZioHttpInterpreter(
-          ZioHttpServerOptions.default
+          ZioHttpServerOptions.default.appendInterceptor(
+            CORSInterceptor.default
+          )
         ).toHttp(endpoints)
     )
     _ <- Console.printLine("Server Started")

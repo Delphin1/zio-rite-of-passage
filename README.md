@@ -22,3 +22,7 @@ TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
 sbt: ~fastOptJS
 npm run star
 
+http post localhost:8080/users email='tsg@tsgcompany.com' password='test'
+http post localhost:8080/users/login email='tsg@tsgcompany.com' password='test'
+http post localhost:8080/companies name='Google' url='google.com' country='USA' industry='tech' tags:='["it","good"]' 'Authorization: Bearer XXX'
+

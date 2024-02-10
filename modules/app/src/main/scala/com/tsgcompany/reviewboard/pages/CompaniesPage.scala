@@ -1,15 +1,9 @@
 package com.tsgcompany.reviewboard.pages
 
-
 import com.raquo.laminar.api.L.{*, given}
 import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.components.Anchors
 import com.tsgcompany.reviewboard.domain.data.*
-import com.tsgcompany.reviewboard.http.endpoints.CompanyEndpoints
-import sttp.client3.*
-import sttp.client3.impl.zio.FetchZioBackend
-import sttp.tapir.client.sttp.SttpClientInterpreter
-import zio.*
 
 object CompaniesPage {
   val simpleCompany = Company(
@@ -29,21 +23,16 @@ object CompaniesPage {
       // fetch API
       // AJAX
       // ZIO endpoint
-      val companyEndpoints = new CompanyEndpoints {}
-      val theEndpoint = companyEndpoints.getAllEndpoint
-      val backend = FetchZioBackend()
-      val interpreter: SttpClientInterpreter = SttpClientInterpreter()
-      val request = interpreter
-        .toRequestThrowDecodeFailures(theEndpoint, Some(uri"http://localhost:8080"))
-        .apply(())
-      val companiesZIO = backend.send(request).map(_.body).absolve
-      // run the ZIO effect
-      Unsafe.unsafe { implicit unsafe =>
-        Runtime.default.unsafe.fork(
-          companiesZIO.tap(list => ZIO.attempt(companiesBus.emit(list)))
-        )
-      }
+      import com.tsgcompany.reviewboard.core.ZJS.*
+      val companiesZIO = useBackend(_.company.getAllEndpoint(()))
+      companiesZIO.emitTo(companiesBus)
   }
+
+
+
+  
+  
+
   def apply() =
     sectionTag(
       onMountCallback(_ => performBackendCall()),

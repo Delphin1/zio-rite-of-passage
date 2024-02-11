@@ -21,8 +21,14 @@ TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
 
 sbt: ~fastOptJS
 npm run star
+docker exec -it zio-rite-of-passage-db-1 psql -U docker
+\c reviewboard
+
+
 
 http post localhost:8080/users email='tsg@tsgcompany.com' password='test'
 http post localhost:8080/users/login email='tsg@tsgcompany.com' password='test'
-http post localhost:8080/companies name='Google' url='google.com' country='USA' industry='tech' tags:='["it","good"]' 'Authorization: Bearer XXX'
+http post localhost:8080/companies name='Google' url='google.com' country='USA' location='Boston' industry='tech' tags:='["it","good"]' 'Authorization: Bearer XXX'
+http post localhost:8080/companies name='Libertex' url='https://libertex.com/' country='Montenegro' location='Podgorica' industry='fintech' tags:='["it","finance"]' 'Authorization: Bearer XXX'
+http post localhost:8080/companies name='Rostec' url='https://rostec.ru/' country='Russia' location=Moscow industry='gos' tags:='["weapons","war"]' 'Authorization: Bearer XXX'
 

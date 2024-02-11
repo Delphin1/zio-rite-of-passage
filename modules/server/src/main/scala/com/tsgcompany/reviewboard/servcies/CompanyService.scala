@@ -13,6 +13,7 @@ trait CompanyService {
   def getAll: Task[List[Company]]
   def getById(id: Long): Task[Option[Company]]
   def getBySlag(slug: String): Task[Option[Company]]
+  def allFilters: Task[CompanyFilter]
 }
 
 
@@ -29,6 +30,9 @@ class CompanyServiceLive private(repo: CompanyRepository) extends CompanyService
 
   override def getBySlag(slug: String): Task[Option[Company]] =
     repo.getBySlug(slug)
+
+  override def allFilters: Task[CompanyFilter] =
+    repo.uniqueAttributes
 }
 
 object CompanyServiceLive {

@@ -1,10 +1,13 @@
 package com.tsgcompany.reviewboard.http.endpoints
 
-import com.tsgcompany.reviewboard.domain.data.*
-import com.tsgcompany.reviewboard.http.requests.*
+
 import sttp.tapir.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
+import zio.*
+
+import com.tsgcompany.reviewboard.domain.data.*
+import com.tsgcompany.reviewboard.http.requests.*
 trait CompanyEndpoints extends BaseEndpoint {
     val createEndpoint =
       secureBaseEndpoint
@@ -15,7 +18,8 @@ trait CompanyEndpoints extends BaseEndpoint {
         .post
         .in(jsonBody[CreateCompanyRequest])
         .out(jsonBody[Company])
-    val getAllEndpoint =
+      
+    val getAllEndpoint: Endpoint[Unit, Unit, Throwable, List[Company], Any] =
       baseEndpoint
         .tag("companies")
         .name("getAll")
@@ -32,5 +36,14 @@ trait CompanyEndpoints extends BaseEndpoint {
         .in("companies" / path[String]("id"))
         .get
         .out(jsonBody[Option[Company]])
+
+    val allFilterEndpoint: Endpoint[Unit, Unit, Throwable, CompanyFilter, Any] =
+        baseEndpoint
+          .tag("companies")
+          .name("allFilters")
+          .description("Get all possible search filters")
+          .in("companies" / "filters")
+          .get
+          .out(jsonBody[CompanyFilter])
 
 }

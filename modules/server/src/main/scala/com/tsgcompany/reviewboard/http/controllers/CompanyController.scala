@@ -1,6 +1,6 @@
 package com.tsgcompany.reviewboard.http.controllers
 
-import com.tsgcompany.reviewboard.domain.data.{Company, UserId}
+import com.tsgcompany.reviewboard.domain.data.*
 import com.tsgcompany.reviewboard.servcies.{CompanyService, JWTService}
 import com.tsgcompany.reviewboard.http.endpoints.*
 import sttp.tapir.server.ServerEndpoint
@@ -21,18 +21,28 @@ class CompanyController private (service: CompanyService, jwtService: JWTService
       service.getAll.either
     }
 
-  val getById: ServerEndpoint[Any, Task] = getByIdEndpoint.serverLogic { id =>
+
+  val getById: ServerEndpoint[Any, Task] =
+    getByIdEndpoint.serverLogic { id =>
     ZIO
       .attempt(id.toLong)
       .flatMap(service.getById)
       .catchSome {
         case _: NumberFormatException =>
           service.getBySlag(id)
-      }.either
+      }
+      .either
   }
 
+  val allFilters: ServerEndpoint[Any, Task] =
+    allFilterEndpoint.serverLogic { _ =>
+      service.allFilters.either
 
-  override val routes: List[ServerEndpoint[Any, Task]] = List(create, getAll, getById)
+    }
+
+
+
+  override val routes: List[ServerEndpoint[Any, Task]] = List(create, getAll, allFilters, getById)
 }
 
 

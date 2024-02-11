@@ -2,7 +2,7 @@ package com.tsgcompany.reviewboard.pages
 
 import com.raquo.laminar.api.L.{*, given}
 import com.tsgcompany.reviewboard.common.Constants
-import com.tsgcompany.reviewboard.components.Anchors
+import com.tsgcompany.reviewboard.components.{Anchors, FilterPanel}
 import com.tsgcompany.reviewboard.domain.data.*
 
 object CompaniesPage {
@@ -50,7 +50,7 @@ object CompaniesPage {
           cls := "row jvm-recent-companies-body",
           div(
             cls := "col-lg-4",
-            div("TODO filter panel here")
+            FilterPanel()
           ),
           div(
             cls := "col-lg-8",

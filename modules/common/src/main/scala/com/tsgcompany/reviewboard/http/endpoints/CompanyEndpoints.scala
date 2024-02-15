@@ -37,7 +37,7 @@ trait CompanyEndpoints extends BaseEndpoint {
         .get
         .out(jsonBody[Option[Company]])
 
-    val allFilterEndpoint: Endpoint[Unit, Unit, Throwable, CompanyFilter, Any] =
+    val allFiltersEndpoint: Endpoint[Unit, Unit, Throwable, CompanyFilter, Any] =
         baseEndpoint
           .tag("companies")
           .name("allFilters")

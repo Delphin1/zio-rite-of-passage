@@ -35,7 +35,7 @@ class CompanyController private (service: CompanyService, jwtService: JWTService
   }
 
   val allFilters: ServerEndpoint[Any, Task] =
-    allFilterEndpoint.serverLogic { _ =>
+    allFiltersEndpoint.serverLogic { _ =>
       service.allFilters.either
 
     }

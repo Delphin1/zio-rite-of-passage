@@ -20,7 +20,7 @@ TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
 ```
 
 sbt: ~fastOptJS
-npm run star
+npm run start
 docker exec -it zio-rite-of-passage-db-1 psql -U docker
 \c reviewboard
 

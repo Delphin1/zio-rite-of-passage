@@ -2,12 +2,22 @@ package com.tsgcompany.reviewboard.components
 
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.StringAsIsCodec
+import com.tsgcompany.reviewboard.core.ZJS.*
+import com.tsgcompany.reviewboard.domain.data.CompanyFilter
 import sttp.client3.*
 
 
 object FilterPanel {
+  val GROUP_LOCATION = "Location"
+  val GROUP_COUNTRIES = "Countries"
+  val GROUP_INDUSTRIES = "Industries"
+  val GROUP_TAGS = "Tags"
+
+  val possibleFilter  = EventBus[CompanyFilter]()
   def apply() =
     div(
+      onMountCallback(_ => useBackend(_.company.allFiltersEndpoint(())).emitTo(possibleFilter)),
+      //child.text <-- possibleFilter.events.map(_.toString),
       cls := "accordion accordion-flush",
       idAttr := "accordionFlushExample",
       div(
@@ -39,10 +49,10 @@ object FilterPanel {
           htmlAttr("data-bs-parent", StringAsIsCodec) := "#accordionFlushExample",
           div(
             cls := "accordion-body p-0",
-            renderFilterOptions("Locations", List("London", "Paris")),
-            renderFilterOptions("Countries", List("UK", "France")),
-            renderFilterOptions("Industries", List("Banking", "Aviation")),
-            renderFilterOptions("Tags", List("Scala", "ZIO", "Typelevel")),
+            renderFilterOptions(GROUP_LOCATION, _.locations),
+            renderFilterOptions(GROUP_COUNTRIES, _.countries),
+            renderFilterOptions(GROUP_INDUSTRIES, _.industries),
+            renderFilterOptions(GROUP_TAGS, _.tags),
             div(
               cls := "jvm-accordion-search-btn",
               button(
@@ -56,7 +66,7 @@ object FilterPanel {
       )
     )
 
-  def renderFilterOptions(groupName: String, options: List[String]) =
+  def renderFilterOptions(groupName: String, optionsFn: CompanyFilter => List[String]) =
     div(
       cls := "accordion-item",
       h2(
@@ -81,24 +91,30 @@ object FilterPanel {
           cls := "accordion-body",
           div(
             cls := "mb-3",
-            options.map { value =>
-              div(
-                cls := "form-check",
-                label(
-                  cls := "form-check-label",
-                  forId := s"filter-$groupName-$value",
-                  value
-                ),
-                input(
-                  cls := "form-check-input",
-                  `type` := "checkbox",
-                  idAttr := s"filter-$groupName-$value"
-                )
-              )
-            }
+            // statefull Singnals Vars
+            children <-- possibleFilter.events.toSignal(CompanyFilter.empty)
+              .map(filter =>
+                optionsFn(filter).map(value => renderCheckbox(groupName, value))
+            )
+
           )
         )
       )
     )
+
+  private def renderCheckbox(groupName: String, value: String) =
+      div(
+        cls := "form-check",
+        label(
+          cls := "form-check-label",
+          forId := s"filter-$groupName-$value",
+          value
+        ),
+        input(
+          cls := "form-check-input",
+          `type` := "checkbox",
+          idAttr := s"filter-$groupName-$value"
+        )
+      )
 
 }

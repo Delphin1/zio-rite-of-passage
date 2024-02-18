@@ -1,3 +1,5 @@
+--SELECT 'CREATE DATABASE reviewboard'
+--WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'reviewboard')\gexec
 CREATE DATABASE reviewboard;
 \c reviewboard;
 

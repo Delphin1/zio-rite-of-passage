@@ -1,3 +1,4 @@
+
 package com.tsgcompany.reviewboard.servcies
 
 import zio.*
@@ -14,6 +15,7 @@ trait CompanyService {
   def getById(id: Long): Task[Option[Company]]
   def getBySlag(slug: String): Task[Option[Company]]
   def allFilters: Task[CompanyFilter]
+  def search(filter: CompanyFilter): Task[List[Company]]
 }
 
 
@@ -33,6 +35,9 @@ class CompanyServiceLive private(repo: CompanyRepository) extends CompanyService
 
   override def allFilters: Task[CompanyFilter] =
     repo.uniqueAttributes
+
+  override def search(filter: CompanyFilter): Task[List[Company]] =
+    repo.search(filter)
 }
 
 object CompanyServiceLive {

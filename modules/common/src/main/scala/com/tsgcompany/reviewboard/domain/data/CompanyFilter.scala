@@ -6,7 +6,9 @@ case class CompanyFilter (
   countries: List[String] = List(),
   industries: List[String] = List(),
   tags: List[String] = List()
-) derives JsonCodec
+) derives JsonCodec {
+  val isEmpty = locations.isEmpty && countries.isEmpty && industries.isEmpty && tags.isEmpty
+}
 
 object CompanyFilter {
   val empty = CompanyFilter()

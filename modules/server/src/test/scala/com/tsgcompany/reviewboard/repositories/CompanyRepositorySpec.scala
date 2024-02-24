@@ -1,6 +1,6 @@
 package com.tsgcompany.reviewboard.repositories
 
-import com.tsgcompany.reviewboard.domain.data.Company
+import com.tsgcompany.reviewboard.domain.data.{Company, CompanyFilter}
 import com.tsgcompany.reviewboard.services.CompanyServiceSpec.test
 import com.tsgcompany.reviewboard.syntax.*
 import zio.*
@@ -25,7 +25,11 @@ object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec {
       id = -1L,
       slug = genString(),
       name = genString(),
-      url = genString()
+      url = genString(),
+      location = Some(genString()),
+      country = Some(genString()),
+      industry = Some(genString()),
+      tags = (1 to 3).map(_ => genString()).toList
     )
 
   override def spec: Spec[TestEnvironment & Scope, Any] =
@@ -105,6 +109,17 @@ object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec {
 
         program.assert { case (companies, companiesFetched) =>
           companies.toSet == companiesFetched.toSet
+        }
+      },
+      test("search by tag") {
+        val program = for {
+          repo             <- ZIO.service[CompanyRepository]
+          company        <- repo.create(genCompany())
+          fetched   <- repo.search(CompanyFilter(tags = company.tags.headOption.toList))
+        } yield (fetched, company)  
+        
+        program.assert{ case (fetched, company) =>
+          fetched.nonEmpty && fetched.tail.isEmpty && fetched.head == company  
         }
       }
     ).provide(

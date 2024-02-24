@@ -2,40 +2,44 @@ package com.tsgcompany.reviewboard.pages
 
 import com.raquo.laminar.api.L.{*, given}
 import com.tsgcompany.reviewboard.common.Constants
-import com.tsgcompany.reviewboard.components.{Anchors, FilterPanel}
+import com.tsgcompany.reviewboard.components.*
 import com.tsgcompany.reviewboard.domain.data.*
+import com.tsgcompany.reviewboard.core.ZJS.*
 
 object CompaniesPage {
-  val simpleCompany = Company(
-    1L,
-    "Simple Company",
-    "Simple-company",
-    "http://dummy.com",
-    Some("Anywhere"),
-    Some("On Mars"),
-    Some("space travel"),
-    None,
-    List("space", "scala")
-  )
+//  val simpleCompany = Company(
+//    1L,
+//    "Simple Company",
+//    "Simple-company",
+//    "http://dummy.com",
+//    Some("Anywhere"),
+//    Some("On Mars"),
+//    Some("space travel"),
+//    None,
+//    List("space", "scala")
+//  )
+  // components
+  val filterPanel = new FilterPanel
+
   
-  val companiesBus = EventBus[List[Company]]()
-  def performBackendCall(): Unit = {
-      // fetch API
-      // AJAX
-      // ZIO endpoint
-      import com.tsgcompany.reviewboard.core.ZJS.*
-      val companiesZIO = useBackend(_.company.getAllEndpoint(()))
-      companiesZIO.emitTo(companiesBus)
+  val companyEvents: EventStream[List[Company]] =
+    useBackend(_.company.getAllEndpoint(())).toEventStream.mergeWith{
+    filterPanel.triggerFilters.flatMap { newFilter =>
+      useBackend(_.company.searchEndpoint(newFilter)).toEventStream
+    }
   }
+//  def performBackendCall(): Unit = {
+//      // fetch API
+//      // AJAX
+//      // ZIO endpoint
+//      import com.tsgcompany.reviewboard.core.ZJS.*
+//      val companiesZIO = useBackend(_.company.getAllEndpoint(()))
+//      companiesZIO.emitTo(companiesBus)
+//  }
 
-
-
-  
-  
 
   def apply() =
     sectionTag(
-      onMountCallback(_ => performBackendCall()),
       cls := "section-1",
       div(
         cls := "container company-list-hero",
@@ -50,11 +54,12 @@ object CompaniesPage {
           cls := "row jvm-recent-companies-body",
           div(
             cls := "col-lg-4",
-            FilterPanel()
+            //FilterPanel()
+            filterPanel()
           ),
           div(
             cls := "col-lg-8",
-            children <-- companiesBus.events.map(_.map(renderCompany))
+            children <-- companyEvents.map(_.map(renderCompany))
           )
         )
       )

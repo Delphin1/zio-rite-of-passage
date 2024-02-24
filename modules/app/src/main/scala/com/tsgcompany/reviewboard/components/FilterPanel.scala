@@ -7,20 +7,20 @@ import com.tsgcompany.reviewboard.domain.data.CompanyFilter
 import sttp.client3.*
 
 
-object FilterPanel {
+class FilterPanel {
   case class CheckValueEvents(groupName: String, value: String, checked: Boolean)
 
-  val GROUP_LOCATION = "Location"
-  val GROUP_COUNTRIES = "Countries"
-  val GROUP_INDUSTRIES = "Industries"
-  val GROUP_TAGS = "Tags"
+  private val GROUP_LOCATION = "Location"
+  private val GROUP_COUNTRIES = "Countries"
+  private val GROUP_INDUSTRIES = "Industries"
+  private val GROUP_TAGS = "Tags"
 
-  val possibleFilter  = EventBus[CompanyFilter]()
-  val checkEvents = EventBus[CheckValueEvents]()
+  private val possibleFilter  = EventBus[CompanyFilter]()
+  private val checkEvents = EventBus[CheckValueEvents]()
   // Map[String, Set[String]] => CompanyFilter
-  val clicks = EventBus[Unit]() // clicks on the "apply" button
-  val dirty = clicks.events.mapTo(false).mergeWith(checkEvents.events.mapTo(true)) // emit either true or false depending to show "apply" or not
-  val state: Signal[CompanyFilter] = checkEvents.events
+  private val clicks = EventBus[Unit]() // clicks on the "apply" button
+  private val dirty = clicks.events.mapTo(false).mergeWith(checkEvents.events.mapTo(true)) // emit either true or false depending to show "apply" or not
+  private val state: Signal[CompanyFilter] = checkEvents.events
     .scanLeft(Map[String, Set[String]]()) { (currentMap, event) =>
       event match
         case  CheckValueEvents(groupName, value, checked) =>
@@ -36,12 +36,12 @@ object FilterPanel {
       )
 
     }
-
+  // informs CompanyPage to rerender
+  val triggerFilters: EventStream[CompanyFilter] = clicks.events.withCurrentValueOf(state)
   def apply() =
     div(
       onMountCallback(_ => useBackend(_.company.allFiltersEndpoint(())).emitTo(possibleFilter)),
-
-      //child.text <-- state.map(_.toString),
+      //child.text <-- triggerFilters.map(_.toString),
       cls := "accordion accordion-flush",
       idAttr := "accordionFlushExample",
       div(

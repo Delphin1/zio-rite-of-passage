@@ -11,7 +11,7 @@ import zio.*
 import zio.test.*
 import zio.json.*
 import com.tsgcompany.reviewboard.syntax.assert
-import com.tsgcompany.reviewboard.domain.data.{Company, User, UserId, UserToken}
+import com.tsgcompany.reviewboard.domain.data.{Company, CompanyFilter, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
 import com.tsgcompany.reviewboard.servcies.{CompanyService, JWTService}
 import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
@@ -37,6 +37,12 @@ object CompanyControllerSpec extends ZIOSpecDefault {
           if (id == 1) Some(testCompany)
           else None
       }
+
+    override def allFilters: Task[CompanyFilter] =
+      ZIO.succeed(CompanyFilter())
+
+    override def search(filter: CompanyFilter): Task[List[Company]] =
+      ZIO.succeed(List(testCompany))
   }
 
   private val jwtServiceStub = new JWTService {

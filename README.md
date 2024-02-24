@@ -31,4 +31,4 @@ http post localhost:8080/users/login email='tsg@tsgcompany.com' password='test'
 http post localhost:8080/companies name='Google' url='google.com' country='USA' location='Boston' industry='tech' tags:='["it","good"]' 'Authorization: Bearer XXX'
 http post localhost:8080/companies name='Libertex' url='https://libertex.com/' country='Montenegro' location='Podgorica' industry='fintech' tags:='["it","finance"]' 'Authorization: Bearer XXX'
 http post localhost:8080/companies name='Rostec' url='https://rostec.ru/' country='Russia' location=Moscow industry='gos' tags:='["weapons","war"]' 'Authorization: Bearer XXX'
-
+http post localhost:8080/companies/search countries:='["Montenegro"]' locations:='[]' industries:='[]' tags:='[]'

@@ -23,8 +23,7 @@ object ZJS {
     }
     def runJs =
       Unsafe.unsafe { implicit unsafe =>
-        Runtime.default.unsafe.runToFuture(zio.provide(BackendClientLive.configuredLayer
-        ))
+        Runtime.default.unsafe.runToFuture(zio.provide(BackendClientLive.configuredLayer))
       }
   extension [I, E <: Throwable, O](endpoint: Endpoint[Unit, I, E, O, Any])
     def apply(payload: I): Task[O] =

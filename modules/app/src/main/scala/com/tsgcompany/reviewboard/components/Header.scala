@@ -2,10 +2,11 @@ package com.tsgcompany.reviewboard.components
 
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.StringAsIsCodec
+import com.tsgcompany.reviewboard.core.*
 import frontroute.*
 import org.scalajs.dom
-
 import com.tsgcompany.reviewboard.common.*
+import com.tsgcompany.reviewboard.domain.data.UserToken
 
 object Header {
   def apply() =
@@ -35,7 +36,7 @@ object Header {
                   idAttr := "navbarNav",
                   ul(
                     cls := "navbar-nav ms-auto menu align-center expanded text-center SMN_effect-3",
-                   renderNavLinks()
+                    children <-- Session.userState.signal.map(renderNavLinks)
                   )
                 )
               )
@@ -56,11 +57,27 @@ object Header {
 
 
     )
-  private def renderNavLinks() = List(
-    renderNavLink("Companies", "/companies"),
-    renderNavLink("Log In", "/login"),
-    renderNavLink("Sign up", "/signup")
-  )
+  private def renderNavLinks(maybeUser: Option[UserToken]) ={
+    val constantLinks = List(
+      renderNavLink("Companies", "/companies")
+    )
+    val unauthedLinks = List(
+      renderNavLink("Log In", "/login"),
+      renderNavLink("Sign up", "/signup")
+    )
+    val authedLinks = List(
+      renderNavLink("Add compnay", "/post"),
+      renderNavLink("Profile", "/profile"),
+      renderNavLink("Log Out", "/logout"),
+    )
+
+    val customLinks =
+      if (maybeUser.nonEmpty) authedLinks
+      else unauthedLinks
+
+    constantLinks ++ customLinks
+
+  }
   private def renderNavLink(text: String, location: String) =
     li(
       cls := "nav-item",

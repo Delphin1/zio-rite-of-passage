@@ -13,6 +13,7 @@ import com.tsgcompany.reviewboard.http.endpoints.*
 
 trait BackendClient {
   val company: CompanyEndpoints
+  val user: UserEndpoints
   def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O]
 
 }
@@ -26,7 +27,8 @@ class BackendClientLive(
   private def endpointRequest[I,E,O](endpoint: Endpoint[Unit, I, E, O, Any]): I => Request[Either[E, O], Any] =
     interpreter
       .toRequestThrowDecodeFailures(endpoint, config.uri)
-
+    
+  override val user: UserEndpoints = new UserEndpoints {}
   override def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O] =
     backend.send(endpointRequest(endpoint)(payload)).map(_.body).absolve
 }

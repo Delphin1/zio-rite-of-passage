@@ -15,6 +15,9 @@ object Router {
           (pathEnd |  path("companies")) { // localhost:1234 or localhost:1234/ or localhost:1234/companies
             CompaniesPage()
           },
+          path("logout") {
+            LogoutPage()
+          },
           path("login") {
             LoginPage()
           },

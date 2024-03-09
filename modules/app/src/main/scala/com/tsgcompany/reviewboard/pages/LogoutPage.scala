@@ -22,7 +22,7 @@ object LogoutPage extends FormPage[LogoutPageState]("Log Out") {
   def renderChildren(): List[ReactiveHtmlElement[dom.html.Element]] = List(
     div(
       onMountCallback(_ => Session.clearUserState()),
-      cls := "logout-status",
+      cls := "centered-text",
       "You've just been successfully logged out"
     )
   )

@@ -11,10 +11,13 @@ import zio.*
 import com.tsgcompany.reviewboard.config.*
 import com.tsgcompany.reviewboard.http.endpoints.*
 
+case class RestrictedEndpointException(msg: String) extends RuntimeException(msg)
+
 trait BackendClient {
   val company: CompanyEndpoints
   val user: UserEndpoints
   def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O]
+  def secureEndpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[String, I, E, O, Any])(payload: I): Task[O]
 
 }
 
@@ -27,10 +30,27 @@ class BackendClientLive(
   private def endpointRequest[I,E,O](endpoint: Endpoint[Unit, I, E, O, Any]): I => Request[Either[E, O], Any] =
     interpreter
       .toRequestThrowDecodeFailures(endpoint, config.uri)
+
+  private def secureEndpointRequest[S, I, E, O](endpoint: Endpoint[S, I, E, O, Any]): S => I => Request[Either[E, O], Any] =
+    interpreter
+      .toSecureRequestThrowDecodeFailures(endpoint, config.uri)
+
+  private def tokenOrFail =
+    ZIO
+      .fromOption(Session.getUserState)
+      .orElseFail(RestrictedEndpointException("You need to login"))
+      .map(_.token)
     
   override val user: UserEndpoints = new UserEndpoints {}
   override def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O] =
     backend.send(endpointRequest(endpoint)(payload)).map(_.body).absolve
+
+  override def secureEndpointRequestZIO[I, E <: Throwable, O](endpoint: Endpoint[String, I, E, O, Any])(payload: I): Task[O] =
+    for {
+      token <- tokenOrFail
+      response <- backend.send(secureEndpointRequest(endpoint)(token)(payload)).map(_.body).absolve
+    } yield response
+
 }
 
 object BackendClientLive {

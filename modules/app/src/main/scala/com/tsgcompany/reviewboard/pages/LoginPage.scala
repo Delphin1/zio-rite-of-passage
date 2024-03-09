@@ -2,13 +2,12 @@ package com.tsgcompany.reviewboard.pages
 
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
-import frontroute.*
 import zio.*
-
 import com.tsgcompany.reviewboard.common.*
 import com.tsgcompany.reviewboard.core.ZJS.*
 import com.tsgcompany.reviewboard.core.*
 import com.tsgcompany.reviewboard.http.requests.LoginRequest
+import frontroute.BrowserNavigation
 
 case class LoginFormState(email: String = "", 
                           password: String = "", 

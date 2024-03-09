@@ -24,6 +24,9 @@ object Router {
           path("signup") {
             SignupPage()
           },
+          path("profile") {
+            ProfilePage()
+          },
           noneMatched {
             NotFoundPage()
           }

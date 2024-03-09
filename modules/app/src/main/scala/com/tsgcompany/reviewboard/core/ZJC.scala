@@ -4,6 +4,8 @@ import com.raquo.laminar.api.L.{*, given}
 import sttp.tapir.Endpoint
 import zio.*
 
+import scala.annotation.targetName
+
 object ZJS {
   def useBackend =
     ZIO.serviceWithZIO[BackendClient]
@@ -27,9 +29,19 @@ object ZJS {
       }
   extension [I, E <: Throwable, O](endpoint: Endpoint[Unit, I, E, O, Any])
     def apply(payload: I): Task[O] =
-      ZIO.service[BackendClient].flatMap{ backendClient =>
-        backendClient.endpointRequestZIO(endpoint)(payload)
-      }.provide(BackendClientLive.configuredLayer)
+      ZIO
+        .service[BackendClient]
+        .flatMap(_.endpointRequestZIO(endpoint)(payload))
+        .provide(BackendClientLive.configuredLayer)
+
+  extension [I, E <: Throwable, O](endpoint: Endpoint[String, I, E, O, Any])
+    @targetName("applySecure")
+    def apply(payload: I): Task[O] =
+      ZIO
+        .service[BackendClient]
+        .flatMap(_.secureEndpointRequestZIO(endpoint)(payload))
+        .provide(BackendClientLive.configuredLayer)
+
 
 }
 

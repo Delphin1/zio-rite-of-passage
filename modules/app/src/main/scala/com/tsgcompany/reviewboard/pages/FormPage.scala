@@ -21,12 +21,15 @@ trait FormState {
 }
 
 abstract class FormPage[S <: FormState](title: String) {
-  val stateVar: Var[S]
+  //val stateVar: Var[S]
 
   def renderChildren(): List[ReactiveHtmlElement[dom.html.Element]]
+  def basicState: S
+  val stateVar: Var[S] = Var(basicState)
 
   def apply() =
       div(
+        onMountCallback(_ => stateVar.set(basicState)),
         cls := "row",
         div(
           cls := "col-md-5 p-0",

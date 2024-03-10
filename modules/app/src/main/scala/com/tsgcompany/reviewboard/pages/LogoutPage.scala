@@ -17,7 +17,8 @@ case class LogoutPageState() extends FormState {
 
 }
 object LogoutPage extends FormPage[LogoutPageState]("Log Out") {
-  override val stateVar: Var[LogoutPageState] = Var(LogoutPageState())
+  //override val stateVar: Var[LogoutPageState] = Var(LogoutPageState())
+  override def basicState = LogoutPageState()
 
   def renderChildren(): List[ReactiveHtmlElement[dom.html.Element]] = List(
     div(

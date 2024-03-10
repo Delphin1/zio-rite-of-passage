@@ -29,7 +29,8 @@ case class SignUpFormState(
   override val maybeSuccess: Option[String] = upstreamStatus.flatMap(_.toOption)
 }
 object SignupPage extends FormPage[SignUpFormState]("Sign Up") {
-  override val stateVar: Var[SignUpFormState] = Var(SignUpFormState())
+  //override val stateVar: Var[SignUpFormState] = Var(SignUpFormState())
+  override def basicState = SignUpFormState()
 
   val submitter = Observer[SignUpFormState] { state =>
     if (state.hasErrors) {

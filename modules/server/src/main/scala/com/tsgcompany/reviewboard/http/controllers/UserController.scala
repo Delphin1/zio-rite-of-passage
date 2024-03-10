@@ -26,7 +26,7 @@ class UserController private (userService: UserService, jwtService: JWTService) 
       .serverLogic { req =>
          userService
            .generateToken(req.email, req.password)
-           .someOrFail(UnauthorizedException)
+           .someOrFail(UnauthorizedException("Email or password is incorrect"))
            .either
 
   }
@@ -61,7 +61,7 @@ class UserController private (userService: UserService, jwtService: JWTService) 
     recoverPasswordEndpoint
       .serverLogic{ req =>
         userService.recoverPasswordFromToken(req.email, req.token, req.newPassword)
-        .filterOrFail(b => b)(UnauthorizedException).unit.either
+        .filterOrFail(b => b)(UnauthorizedException("The email/token combination is invalid")).unit.either
       }
 
   override val routes: List[ServerEndpoint[Any, Task]] = List(

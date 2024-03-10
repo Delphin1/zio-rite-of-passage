@@ -30,6 +30,9 @@ object Router {
           path("forgot") {
             ForgotPasswordPage()
           },
+          path("recover") {
+            RecoverPasswordPage()
+          },
           noneMatched {
             NotFoundPage()
           }

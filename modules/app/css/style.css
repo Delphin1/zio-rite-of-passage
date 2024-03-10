@@ -1540,7 +1540,7 @@ textarea.form-control {
     font-weight: 500;
 }
 
-.page-status-errors {
+.page-status-error {
     border: 0.063rem solid red;
 
     color: red;

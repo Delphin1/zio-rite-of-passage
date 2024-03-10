@@ -4,6 +4,7 @@ import zio.*
 
 import java.security.SecureRandom
 import com.tsgcompany.reviewboard.domain.data.*
+import com.tsgcompany.reviewboard.domain.errors.*
 import com.tsgcompany.reviewboard.repositories.*
 
 import javax.crypto.SecretKeyFactory
@@ -48,7 +49,7 @@ class UserServiceLive private (jwtService: JWTService,
 
   override def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User] =
     for {
-      existingUser <- userRepo.getByEmail(email).someOrFail(new RuntimeException(s"cannot verify user, email $email inexisting"))
+      existingUser <- userRepo.getByEmail(email).someOrFail(UnauthorizedException(s"User email $email doesn't exist"))
       verified <- ZIO.attempt(
         UserServiceLive.Hasher.validateHash(oldPassword, existingUser.hashedPassword)
       )
@@ -61,7 +62,7 @@ class UserServiceLive private (jwtService: JWTService,
 
   override def deleteUser(email: String, password: String): Task[User] =
     for {
-      existingUser <- userRepo.getByEmail(email).someOrFail(new RuntimeException(s"cannot verify user, email $email inexisting"))
+      existingUser <- userRepo.getByEmail(email).someOrFail(UnauthorizedException(s"User email $email doesn't exist"))
       verified <- ZIO.attempt(
         UserServiceLive.Hasher.validateHash(password, existingUser.hashedPassword)
       )

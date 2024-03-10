@@ -25,7 +25,8 @@ case class LoginFormState(email: String = "",
 }
 object LoginPage extends FormPage[LoginFormState]("Log In") {
 
-  override val stateVar = Var(LoginFormState())
+  //override val stateVar = Var(LoginFormState())
+  override def basicState = LoginFormState()
 
   val submitter = Observer[LoginFormState] { state =>
     if (state.hasErrors) {

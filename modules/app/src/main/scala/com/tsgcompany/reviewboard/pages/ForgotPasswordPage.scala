@@ -3,11 +3,11 @@ package com.tsgcompany.reviewboard.pages
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import com.tsgcompany.reviewboard.common.*
+import com.tsgcompany.reviewboard.components.Anchors
 import com.tsgcompany.reviewboard.pages.SignupPage.{renderInput, stateVar}
 import org.scalajs.dom.html.Element
 import org.scalajs.dom
 import zio.*
-
 import com.tsgcompany.reviewboard.core.ZJS.*
 import com.tsgcompany.reviewboard.http.requests.ForgotPasswordRequest
 case class ForgotPasswordState(
@@ -26,7 +26,8 @@ case class ForgotPasswordState(
 
 object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot Password"){
 
-  override val stateVar: Var[ForgotPasswordState] = Var(ForgotPasswordState())
+  //override val stateVar: Var[ForgotPasswordState] = Var(ForgotPasswordState())
+  override def basicState = ForgotPasswordState()
 
   override def renderChildren(): List[ReactiveHtmlElement[Element]] = List(
     renderInput("Email", "email-input", "text", true, "Your email", (s,e) => s.copy(email = e, showStatus = false, upstreamStatus = None)),
@@ -34,7 +35,8 @@ object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot Password
       `type` := "button",
       "Recover Passoword",
       onClick.preventDefault.mapTo(stateVar.now()) --> submitter
-    )
+    ),
+    Anchors.renderNavLink("Have a password recovery token?", "/recover", "auth-link")
   )
 
   val submitter = Observer[ForgotPasswordState] { state =>

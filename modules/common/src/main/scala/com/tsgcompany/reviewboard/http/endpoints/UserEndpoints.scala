@@ -73,7 +73,4 @@ trait UserEndpoints extends BaseEndpoint
           .post
           .in(jsonBody[RecoverPasswordRequest])
 
-
-
-
 }

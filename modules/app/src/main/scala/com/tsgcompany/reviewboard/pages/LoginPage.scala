@@ -4,6 +4,7 @@ import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import zio.*
 import com.tsgcompany.reviewboard.common.*
+import com.tsgcompany.reviewboard.components.Anchors
 import com.tsgcompany.reviewboard.core.ZJS.*
 import com.tsgcompany.reviewboard.core.*
 import com.tsgcompany.reviewboard.http.requests.LoginRequest
@@ -56,7 +57,8 @@ object LoginPage extends FormPage[LoginFormState]("Log In") {
       `type` := "button",
       "Log In",
       onClick.preventDefault.mapTo(stateVar.now()) --> submitter
-    )
+    ),
+    Anchors.renderNavLink("Forgot Password?", "/forgot", "auth-link")
   )
 
 }

@@ -6,10 +6,9 @@ import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.core.ZJS.*
 import com.tsgcompany.reviewboard.http.requests.RegisterUserAccount
 import com.tsgcompany.reviewboard.pages.LoginPage.{renderInput, stateVar}
-import frontroute.*
 import org.scalajs.dom
 import org.scalajs.dom.html
-import zio.ZIO
+import zio.*
 
 case class SignUpFormState(
     email: String = "",

@@ -27,6 +27,9 @@ object Router {
           path("profile") {
             ProfilePage()
           },
+          path("forgot") {
+            ForgotPasswordPage()
+          },
           noneMatched {
             NotFoundPage()
           }

@@ -13,7 +13,7 @@ trait CompanyEndpoints extends BaseEndpoint {
       secureBaseEndpoint
         .tag("companies")
         .name("create")
-        .description("Create a listg for a company")
+        .description("Create a list for a company")
         .in("companies")
         .post
         .in(jsonBody[CreateCompanyRequest])

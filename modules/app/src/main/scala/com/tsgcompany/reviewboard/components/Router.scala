@@ -3,7 +3,6 @@ package com.tsgcompany.reviewboard.components
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import frontroute.*
-
 import com.tsgcompany.reviewboard.pages.*
 object Router {
   def apply() =
@@ -14,9 +13,6 @@ object Router {
           // potential childredn
           (pathEnd |  path("companies")) { // localhost:1234 or localhost:1234/ or localhost:1234/companies
             CompaniesPage()
-          },
-          path("logout") {
-            LogoutPage()
           },
           path("login") {
             LoginPage()
@@ -32,6 +28,12 @@ object Router {
           },
           path("recover") {
             RecoverPasswordPage()
+          },
+          path("logout") {
+            LogoutPage()
+          },
+          path("post") {
+            CreateCompanyPage()
           },
           noneMatched {
             NotFoundPage()

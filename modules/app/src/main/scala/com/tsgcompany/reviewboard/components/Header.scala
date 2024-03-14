@@ -66,7 +66,7 @@ object Header {
       renderNavLink("Sign up", "/signup")
     )
     val authedLinks = List(
-      renderNavLink("Add compnay", "/post"),
+      renderNavLink("Add company", "/post"),
       renderNavLink("Profile", "/profile"),
       renderNavLink("Log Out", "/logout"),
     )

@@ -5,7 +5,7 @@ import com.raquo.laminar.nodes.ReactiveHtmlElement
 import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.core.ZJS.*
 import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
-import org.scalajs.dom.{File, FileReader}
+import org.scalajs.dom.*
 import org.scalajs.dom.html.Element
 import zio.*
 
@@ -42,6 +42,9 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post New Company"
     renderInput("Company name", "name", "text", true, "ACME Inc", (s,v) => s.copy(name =v)),
     renderInput("Company URL", "url", "text", true, "https://acme.com", (s,v) => s.copy(url =v)),
     renderLogoUpload("Company logo", "logo"),
+    img(
+      src <-- stateVar.signal.map(_.image.getOrElse(""))
+    ),
     renderInput("Location", "location", "text", false, "Somewhere", (s,v) => s.copy(location =Some(v))),
     renderInput("Country", "country", "text", false, "Some Country", (s,v) => s.copy(country =Some(v))),
     renderInput("Industry", "industry", "text", false, "FP", (s,v) => s.copy(industry =Some(v))),
@@ -78,12 +81,42 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post New Company"
       )
     )
 
+  private def computeDimensions(width: Int, height: Int): (Int, Int) =
+    if (width > height) {
+      val ratio = width * 1.0 / 256
+      val newW = width / ratio
+      val newH = height / ratio
+      (newW.toInt, newH.toInt)
+    } else {
+      val (newW, newH) = computeDimensions(height, width)
+      (newW, newH)
+    }
+
   val fileUploader = (files: List[File]) => {
     val maybeFile = files.headOption.filter(_.size > 0)
     maybeFile.foreach { file =>
       val reader = new FileReader
       reader.onload = _ => {
-        stateVar.update(_.copy(image = Some(reader.result.toString)))
+        // 256x256
+        // draw the picture into 256x256
+        // make a fake img tag (not rendered)  - img2
+        val fakeImage = document.createElement("img").asInstanceOf[HTMLImageElement]
+        fakeImage.addEventListener(
+          "load",
+          _ => {
+            val canvas = document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
+            val context = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+            val (width, height) = computeDimensions(fakeImage.width, fakeImage.height)
+            canvas.width = width
+            canvas.height = height
+            // inside make a canvas of at most 256x256
+            // render the original image into that canvas
+            context.drawImage(fakeImage,0,0, width, height)
+            // set the state to the text representation of img2
+            stateVar.update(_.copy(image = Some(canvas.toDataURL(file.`type`))))
+          }
+        )
+        fakeImage.src = reader.result.toString
       }
       reader.readAsDataURL(file)
     }

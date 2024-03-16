@@ -16,6 +16,7 @@ case class RestrictedEndpointException(msg: String) extends RuntimeException(msg
 trait BackendClient {
   val company: CompanyEndpoints
   val user: UserEndpoints
+  val review: ReviewEndpoints
   def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O]
   def secureEndpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[String, I, E, O, Any])(payload: I): Task[O]
 
@@ -42,6 +43,8 @@ class BackendClientLive(
       .map(_.token)
     
   override val user: UserEndpoints = new UserEndpoints {}
+  override val review: ReviewEndpoints = new ReviewEndpoints {}
+  
   override def endpointRequestZIO[I,E <: Throwable,O](endpoint: Endpoint[Unit, I, E, O, Any])(payload: I): Task[O] =
     backend.send(endpointRequest(endpoint)(payload)).map(_.body).absolve
 

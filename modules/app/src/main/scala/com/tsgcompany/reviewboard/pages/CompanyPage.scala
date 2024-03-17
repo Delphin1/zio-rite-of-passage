@@ -2,60 +2,33 @@ package com.tsgcompany.reviewboard.pages
 
 import com.raquo.laminar.api.L.{child, *, given}
 import com.tsgcompany.reviewboard.common.Constants
-import com.tsgcompany.reviewboard.components.CompanyComponents
+import com.tsgcompany.reviewboard.components.*
+import com.tsgcompany.reviewboard.core.*
 import zio.*
 
 import java.time.Instant
 import com.tsgcompany.reviewboard.domain.data.*
 import com.tsgcompany.reviewboard.core.ZJS.*
-import com.tsgcompany.reviewboard.pages.CompanyPage.Status.OK
 
 
 
 object CompanyPage {
 
-  val dummyReviews = List(
-    Review(
-      1,
-      1,
-      1L,
-      5,
-      5,
-      5,
-      5,
-      5,
-      "This is a pretty good company. They write Scala and that's great",
-      Instant.now(),
-      Instant.now()
-    ),
-    Review(
-      1,
-      1,
-      1L,
-      3,
-      4,
-      3,
-      4,
-      4,
-      "Pretty average. Not sure what to think about it. But here's some Markdown: _italics_, **bold**, ~strikethrough~.",
-      Instant.now(),
-      Instant.now()
-    ),
-    Review(
-      1,
-      1,
-      1L,
-      1,
-      1,
-      1,
-      1,
-      1,
-      "Hate it with a passion.",
-      Instant.now(),
-      Instant.now()
-    )
-  )
+  enum Status {
+    case LOADING
+    case NOT_FOUND
+    case OK(company: Company)
+  }
 
+  val addReviewCardActive = Var[Boolean](false)
+  //reactive variables
+  val fetchCompanyBus = EventBus[Option[Company]]()
+  val triggerRefreshBus = EventBus[Unit]()
+
+  val status = fetchCompanyBus.events.scanLeft(Status.LOADING) ( (_,maybeCompany) => maybeCompany match {
+    case None => Status.NOT_FOUND
+    case Some(company) => Status.OK(company)
+  })
 
 
   def renderCompanySummary =
@@ -69,6 +42,34 @@ object CompanyPage {
         )
       )
     )
+
+  def maybeRenderUserAction(maybeUser: Option[UserToken], reviewsSignal: Signal[List[Review]]) =
+    maybeUser match {
+      case None =>
+        div(
+          cls := "jvm-companies-details-card-apply-now-btn",
+          "You must to be logged in to post a review"
+        )
+      case Some(user) =>
+        div(
+          cls := "jvm-companies-details-card-apply-now-btn",
+          child <-- reviewsSignal.map(_.find(_.userId == user.id)) // signal of Option Review
+            .map {
+              case None =>
+                button(
+                  `type` := "button",
+                  cls := "btn btn-warning",
+                  "Add a review",
+                  disabled <-- addReviewCardActive.signal,
+                  onClick.mapTo(true) --> addReviewCardActive.writer
+                )
+              case Some(_) =>
+                div("You already posted a review")
+            }
+
+        )
+    }
+
 
   def renderReview(review: Review) =
     div(
@@ -109,29 +110,23 @@ object CompanyPage {
           )
         )
       )
-    )
+    ) 
 
-  enum Status {
-    case LOADING
-    case NOT_FOUND
-    case OK(company: Company)
-  }
+  def refreshReviewList(companyId: Long) =
+    useBackend(_.review.getByCompanyIdEnpoint(companyId))
+      .toEventStream
+      .mergeWith(triggerRefreshBus.events.flatMap(_ =>
+          useBackend(_.review.getByCompanyIdEnpoint(companyId))
+          .toEventStream
+      ))
 
-  //reactive variables
-  val fetchCompanyBus = EventBus[Option[Company]]()
   def reviewsSignal(companyId: Long): Signal[List[Review]] = fetchCompanyBus.events.flatMap{
     case None => EventStream.empty
-    case Some(company) =>
-      val reviewsBus = EventBus[List[Review]]()
-      useBackend(_.review.getByCompanyIdEnpoint(companyId)).emitTo(reviewsBus)
-      reviewsBus.events
-  }.scanLeft(List[Review]())((_, list) => list)
-  val status = fetchCompanyBus.events.scanLeft(Status.LOADING) ( (_,maybeCompany) => maybeCompany match {
-    case None => Status.NOT_FOUND
-    case Some(company) => Status.OK(company)
+    case Some(company) => refreshReviewList(companyId)
+      
   }
+    .scanLeft(List[Review]())((_, list) => list)
 
-  )
   def apply(id: Long) =
     div(
       cls := "container-fluid the-rock",
@@ -145,7 +140,6 @@ object CompanyPage {
     )
 
   def render(company: Company, reviewsSignal: Signal[List[Review]]) = List(
-
     div(
       cls := "row jvm-companies-details-top-card",
       div(
@@ -162,19 +156,23 @@ object CompanyPage {
             CompanyComponents.renderOverview(company)
           )
         ),
-        div(
-          cls := "jvm-companies-details-card-apply-now-btn",
-          button(
-            `type` := "button",
-            cls := "btn btn-warning",
-            "Add a review"
-          )
-        )
+        child <-- Session.userState.signal.map(maybeUser => maybeRenderUserAction(maybeUser, reviewsSignal))
       )
     ),
     div(
       cls := "container-fluid",
       renderCompanySummary, // TODO
+      children <-- addReviewCardActive.signal
+        .map(active =>
+          Option.when(active)(
+            AddReviewCard(
+              company.id,
+              onCancel = () => addReviewCardActive.set(false),
+              triggerRefreshBus
+            )()
+          )
+        )
+        .map(_.toList),
       children <-- reviewsSignal.map(_.map(renderReview)),
       //dummyReviews.map(renderStaticReview),
       div(
@@ -204,4 +202,8 @@ object CompanyPage {
       )
     )
   )
+
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.tsgcompany.reviewboard.http.requests
 
+import com.tsgcompany.reviewboard.domain.data.Review
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
 
@@ -16,4 +17,14 @@ case class CreateReviewRequest (
 
 object CreateReviewRequest{
   given codec: JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
+  def fromReview(review: Review) = CreateReviewRequest(
+      companyId = review.companyId,
+      userId = review.userId,
+      management = review.management,
+      culture = review.culture,
+      salary = review.salary,
+      benefits = review.benefits,
+      wouldRecommend = review.wouldRecommend,
+      review = review.review
+  )
 }

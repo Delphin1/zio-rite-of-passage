@@ -32,3 +32,10 @@ http post localhost:8080/companies name='Google' url='google.com' country='USA' 
 http post localhost:8080/companies name='Libertex' url='https://libertex.com/' country='Montenegro' location='Podgorica' industry='fintech' tags:='["it","finance"]' 'Authorization: Bearer XXX'
 http post localhost:8080/companies name='Rostec' url='https://rostec.ru/' country='Russia' location=Moscow industry='gos' tags:='["weapons","war"]' 'Authorization: Bearer XXX'
 http post localhost:8080/companies/search countries:='["Montenegro"]' locations:='[]' industries:='[]' tags:='[]'
+
+#Add review insert
+```sql
+insert into reviews(id, company_id, user_id, management, culture, salary, benefits, would_recommend, review, created, updated) values(2, 1, 1, 5, 4, 5, 5, 5, 'Awesome', now(), now());
+```
+
+

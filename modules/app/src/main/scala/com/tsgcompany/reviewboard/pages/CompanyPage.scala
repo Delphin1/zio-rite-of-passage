@@ -1,10 +1,12 @@
 package com.tsgcompany.reviewboard.pages
 
+import com.raquo.laminar.DomApi
 import com.raquo.laminar.api.L.{child, *, given}
 import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.components.*
 import com.tsgcompany.reviewboard.core.*
 import zio.*
+import org.scalajs.dom
 
 import java.time.Instant
 import com.tsgcompany.reviewboard.domain.data.*
@@ -76,7 +78,7 @@ object CompanyPage {
       cls := "container",
       div(
         cls := "markdown-body overview-section",
-        // TODO add a highlight if this is "your" review
+        cls.toggle("review-highlighted") <-- Session.userState.signal.map(_.map(_.id) == Option(review).map(_.userId)),
         div(
           cls := "company-description",
           div(
@@ -87,12 +89,13 @@ object CompanyPage {
             renderReviewDetail("Salary", review.salary),
             renderReviewDetail("Benefits", review.benefits)
           ),
-          // TODO parse this Markdown
-          div(
-            cls := "review-content",
-            review.review
-          ),
-          div(cls := "review-posted", "Posted (TODO) a million years ago")
+
+          injectMarkdown(review),
+
+          div(cls := "review-posted", s"Posted ${Time.unix2hr(review.created.toEpochMilli)}"),
+          child.maybe <-- Session.userState.signal
+            .map(_.filter(_.id == review.userId))
+            .map(_.map(_=> div(cls := "review-posted", "Your review")))
         )
       )
     )
@@ -167,7 +170,7 @@ object CompanyPage {
           Option.when(active)(
             AddReviewCard(
               company.id,
-              onCancel = () => addReviewCardActive.set(false),
+              onDisable = () => addReviewCardActive.set(false),
               triggerRefreshBus
             )()
           )
@@ -203,7 +206,16 @@ object CompanyPage {
     )
   )
 
-
-
+  def injectMarkdown(review: Review) =
+    div(
+      cls := "review-content",
+      DomApi
+        .unsafeParseSvgStringIntoNodeArray(Markdown.toHtml(review.review))
+        .map{
+          case t: dom.Text => span(t.data)
+          case e: dom.html.Element => foreignHtmlElement(e)
+          case _ => emptyNode
+        }
+    )
 
 }

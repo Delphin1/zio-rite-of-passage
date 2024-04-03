@@ -5,7 +5,7 @@ package com.tsgcompany.reviewboard.services
 import zio.*
 import zio.test.*
 
-import com.tsgcompany.reviewboard.servcies.*
+import com.tsgcompany.reviewboard.services.*
 import com.tsgcompany.reviewboard.domain.data.*
 import com.tsgcompany.reviewboard.config.JWTConfig
 

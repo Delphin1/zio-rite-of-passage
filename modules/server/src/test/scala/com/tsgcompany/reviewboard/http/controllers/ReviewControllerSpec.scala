@@ -14,7 +14,7 @@ import zio.json.*
 import java.time.Instant
 import com.tsgcompany.reviewboard.domain.data.{Review, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
-import com.tsgcompany.reviewboard.servcies.{JWTService, ReviewService}
+import com.tsgcompany.reviewboard.services.{JWTService, ReviewService}
 import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
 import com.tsgcompany.reviewboard.syntax.assert
 

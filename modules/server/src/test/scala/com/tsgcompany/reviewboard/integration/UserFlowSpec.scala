@@ -1,13 +1,13 @@
 package com.tsgcompany.reviewboard.integration
 
 import com.tsgcompany.reviewboard.config.{JWTConfig, RecoveryTokensConfig}
-import com.tsgcompany.reviewboard.domain.data.UserToken
+import com.tsgcompany.reviewboard.domain.data.{Company, UserToken}
 import com.tsgcompany.reviewboard.http.controllers.*
 import com.tsgcompany.reviewboard.http.requests.{DeleteAccountRequest, ForgotPasswordRequest, LoginRequest, RecoverPasswordRequest, RegisterUserAccount, UpdatePasswordRequest}
 import com.tsgcompany.reviewboard.http.responses.UserResponse
 import com.tsgcompany.reviewboard.repositories.Repository.dataSourceLayer
 import com.tsgcompany.reviewboard.repositories.*
-import com.tsgcompany.reviewboard.servcies.*
+import com.tsgcompany.reviewboard.services.*
 import sttp.client3.{SttpBackend, UriContext, basicRequest}
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.Method
@@ -84,6 +84,7 @@ object UserFlowSpec extends ZIOSpecDefault with RepositorySpec {
     // specific to the test
     def probeToken(email: String): Task[Option[String]] = ZIO.succeed(db.get(email))
 
+    override def sendReviewInvite(from: String, to: String, company: Company): Task[Unit] = ZIO.fail(new RuntimeException("Not implemented yet"))
   }
 
   val emailServiceLayer: ZLayer[Any, Nothing, EmailServiceProbe] = ZLayer.succeed(new EmailServiceProbe)

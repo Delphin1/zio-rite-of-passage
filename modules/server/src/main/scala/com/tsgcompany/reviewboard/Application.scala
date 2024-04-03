@@ -3,7 +3,7 @@ package com.tsgcompany.reviewboard
 import com.tsgcompany.reviewboard.http.HttpApi
 import com.tsgcompany.reviewboard.repositories.*
 import com.tsgcompany.reviewboard.repositories.Repository.dataLayer
-import com.tsgcompany.reviewboard.servcies.*
+import com.tsgcompany.reviewboard.services.*
 import sttp.tapir.*
 import sttp.tapir.server.interceptor.cors.CORSInterceptor
 import sttp.tapir.server.ziohttp.*
@@ -32,11 +32,13 @@ object Application extends ZIOAppDefault {
     UserServiceLive.layer,
     JWTServiceLive.configuredLayer,
     EmailServiceLive.configuredLayer,
+    InviteServiceLive.configredLayer,
     //repos
     CompanyRepositoryLive.layer,
     ReviewRepositoryLive.layer,
     UserRepositoryLive.layer,
     RecoveryTokenRepositoryLive.configuredLayer,
+    InviteRepositoryLive.layer,
     // other requirements
     dataLayer
     //CompanyService.dummyLayer

@@ -8,7 +8,7 @@ import java.time.Instant
 import com.tsgcompany.reviewboard.domain.data.Review
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
 import com.tsgcompany.reviewboard.repositories.ReviewRepository
-import com.tsgcompany.reviewboard.servcies.{ReviewService, ReviewServiceLive}
+import com.tsgcompany.reviewboard.services.{ReviewService, ReviewServiceLive}
 
 object ReviewServiceSpec extends ZIOSpecDefault {
 

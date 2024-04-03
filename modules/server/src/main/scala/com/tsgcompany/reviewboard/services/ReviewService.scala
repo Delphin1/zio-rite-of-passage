@@ -1,4 +1,4 @@
-package com.tsgcompany.reviewboard.servcies
+package com.tsgcompany.reviewboard.services
 
 import zio.*
 import zio.json.{DeriveJsonCodec, JsonCodec}

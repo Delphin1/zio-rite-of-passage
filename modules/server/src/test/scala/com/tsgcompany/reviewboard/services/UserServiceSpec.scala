@@ -1,8 +1,8 @@
 package com.tsgcompany.reviewboard.services
 
-import com.tsgcompany.reviewboard.domain.data.{User, UserId, UserToken}
+import com.tsgcompany.reviewboard.domain.data.{Company, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.repositories.{RecoveryTokenRepository, UserRepository}
-import com.tsgcompany.reviewboard.servcies.{EmailService, JWTService, UserService, UserServiceLive}
+import com.tsgcompany.reviewboard.services.{EmailService, JWTService, UserService, UserServiceLive}
 import zio.*
 import zio.test.*
 
@@ -64,6 +64,8 @@ object UserServiceSpec extends ZIOSpecDefault{
       override def sendEmail(to: String, subject: String, content: String): Task[Unit] = ZIO.unit
 
       override def sendPasswordRecovery(to: String, token: String): Task[Unit] = ZIO.unit
+
+      override def sendReviewInvite(from: String, to: String, company: Company): Task[Unit] = ZIO.unit
     }
   }
 

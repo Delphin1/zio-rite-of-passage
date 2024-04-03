@@ -37,8 +37,39 @@ CREATE TABLE IF NOT EXISTS users
     hashed_password TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS recovery_tokens (
+CREATE TABLE IF NOT EXISTS recovery_tokens
+(
     email TEXT PRIMARY KEY,
     token TEXT NOT NULL,
     expiration BIGINT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS invites
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_name TEXT NOT NULL,
+    company_id BIGINT NOT NULL,
+    n_invites BIGINT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT false
+);
+
+
+-- dummy data
+insert into companies(
+id,
+slug,
+name,
+url,
+location,
+country,
+industry
+) values (1,
+          'tsg-company',
+          'Tsg Company',
+          'https://tsg-company.com',
+          'Novi Sad',
+          'Serbia',
+          'IT');
+
+insert into invites(id, user_name, company_id, n_invites, active) values (1, 'tsg@tsgcompany.com',1 ,10, true);
+

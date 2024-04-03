@@ -3,7 +3,7 @@ package com.tsgcompany.reviewboard.services
 import com.tsgcompany.reviewboard.domain.data.{Company, CompanyFilter}
 import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
 import com.tsgcompany.reviewboard.repositories.CompanyRepository
-import com.tsgcompany.reviewboard.servcies.{CompanyService, CompanyServiceLive}
+import com.tsgcompany.reviewboard.services.{CompanyService, CompanyServiceLive}
 import com.tsgcompany.reviewboard.syntax.*
 import zio.*
 import zio.test.*

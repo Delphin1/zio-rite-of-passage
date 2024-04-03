@@ -23,6 +23,7 @@ sbt: ~fastOptJS
 npm run start
 docker exec -it zio-rite-of-passage-db-1 psql -U docker
 \c reviewboard
+\d invites
 
 
 
@@ -33,9 +34,25 @@ http post localhost:8080/companies name='Libertex' url='https://libertex.com/' c
 http post localhost:8080/companies name='Rostec' url='https://rostec.ru/' country='Russia' location=Moscow industry='gos' tags:='["weapons","war"]' 'Authorization: Bearer XXX'
 http post localhost:8080/companies/search countries:='["Montenegro"]' locations:='[]' industries:='[]' tags:='[]'
 
-#Add review insert
+### Add review insert
 ```sql
 insert into reviews(id, company_id, user_id, management, culture, salary, benefits, would_recommend, review, created, updated) values(2, 1, 1, 5, 4, 5, 5, 5, 'Awesome', now(), now());
 ```
+
+#Add invites insert
+```sql
+insert into invites(id, user_name, company_id, n_invites, active) values (1, 'tsg@tsgcompany.com',1 ,10, true);
+
+```
+
+### Test invites
+export TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaXNzIjoidHNnY29tcGFueS5jb20iLCJleHAiOjE3MTIyNTc2MjYsImlhdCI6MTcxMjE3MTIyNiwidXNlcm5hbWUiOiJ0c2dAdHNnY29tcGFueS5jb20ifQ.c8ZaQtcMSUepUx7deWBJH1KIHBZKAxUpWn8Mh0QmhlSI9pqbUSjr_cyb1UOOhn8EONZWeLgCYgOdn3CT68y3eg
+
+http post localhost:8080/invite/add companyId=1 "Authorization: Bearer $TOKEN"
+select * from invites;
+
+http get localhost:8080/invite/all "Authorization: Bearer $TOKEN"
+
+http post localhost:8080/invite companyId=1 emails:='["mail1@tsgcompany.com", "mail2@tsgcompany.com", "mail3@tsgcompany.com"]' "Authorization: Bearer $TOKEN"
 
 

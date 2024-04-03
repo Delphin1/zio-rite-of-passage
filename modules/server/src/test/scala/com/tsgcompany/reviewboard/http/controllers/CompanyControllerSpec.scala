@@ -13,7 +13,7 @@ import zio.json.*
 import com.tsgcompany.reviewboard.syntax.assert
 import com.tsgcompany.reviewboard.domain.data.{Company, CompanyFilter, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateCompanyRequest
-import com.tsgcompany.reviewboard.servcies.{CompanyService, JWTService}
+import com.tsgcompany.reviewboard.services.{CompanyService, JWTService}
 import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
 object CompanyControllerSpec extends ZIOSpecDefault {
 

@@ -46,7 +46,7 @@ insert into invites(id, user_name, company_id, n_invites, active) values (1, 'ts
 ```
 
 ### Test invites
-export TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaXNzIjoidHNnY29tcGFueS5jb20iLCJleHAiOjE3MTIyNTc2MjYsImlhdCI6MTcxMjE3MTIyNiwidXNlcm5hbWUiOiJ0c2dAdHNnY29tcGFueS5jb20ifQ.c8ZaQtcMSUepUx7deWBJH1KIHBZKAxUpWn8Mh0QmhlSI9pqbUSjr_cyb1UOOhn8EONZWeLgCYgOdn3CT68y3eg
+export TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaXNzIjoidHNnY29tcGFueS5jb20iLCJleHAiOjE3MTI1MDcxMjEsImlhdCI6MTcxMjQyMDcyMSwidXNlcm5hbWUiOiJ0c2dAdHNnY29tcGFueS5jb20ifQ.6q_P--EnneNiE-2jPCT52lC766Obwgo-ad1oQd-SD_rjvjZ_Qh_b1cVDcJPR-1Szz_B9rT9Jp1LgfN49DHg8Xw
 
 http post localhost:8080/invite/add companyId=1 "Authorization: Bearer $TOKEN"
 select * from invites;
@@ -55,4 +55,5 @@ http get localhost:8080/invite/all "Authorization: Bearer $TOKEN"
 
 http post localhost:8080/invite companyId=1 emails:='["mail1@tsgcompany.com", "mail2@tsgcompany.com", "mail3@tsgcompany.com"]' "Authorization: Bearer $TOKEN"
 
-
+### Test promoted invites
+http post localhost:8080/invite/promoted companyId=1 "Authorization: Bearer $TOKEN"

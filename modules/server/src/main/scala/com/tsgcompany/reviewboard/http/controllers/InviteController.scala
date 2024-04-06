@@ -5,13 +5,13 @@ import sttp.tapir.server.ServerEndpoint
 import zio.*
 import com.tsgcompany.reviewboard.domain.data.*
 import com.tsgcompany.reviewboard.http.endpoints.*
-import com.tsgcompany.reviewboard.services.{InviteService, JWTService}
+import com.tsgcompany.reviewboard.services.{InviteService, JWTService, PaymentService}
 import com.tsgcompany.reviewboard.http.requests.*
 import com.tsgcompany.reviewboard.http.responses.*
 import com.tsgcompany.reviewboard.repositories.{InviteRepository, InviteRepositoryLive, Repository}
 
 
-class InviteController private (inviteService: InviteService, jwtService: JWTService) extends BaseController with InviteEndpoints {
+class InviteController private (inviteService: InviteService, jwtService: JWTService, paymentService: PaymentService) extends BaseController with InviteEndpoints {
   val addPack =
     addPackEndpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
@@ -44,14 +44,29 @@ class InviteController private (inviteService: InviteService, jwtService: JWTSer
           inviteService.getByUserName(token.email).either
       }
 
-  override val routes: List[ServerEndpoint[Any, Task]] = List(addPack, getByUserId, invite)
+  val addPackPromoted =
+    addPackPromotedEndpoint
+      .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
+      .serverLogic{ token => req =>
+      inviteService
+        .addInvitePack(token.email, req.companyId)
+        .flatMap{ packId =>
+          paymentService.createCheckoutSession(packId, token.email)
+        } // Option[Session]
+        .someOrFail(new RuntimeException("Can't create payment checkout session"))
+        .map(_.getUrl()) // the checkout session RUL = the desired payload
+        .either
+      }
+
+  override val routes: List[ServerEndpoint[Any, Task]] = List(addPack, addPackPromoted, getByUserId, invite)
 }
 
 object InviteController {
   val makeZIO = for {
     inviteService <- ZIO.service[InviteService]
     jwtService <- ZIO.service[JWTService]
-  } yield new InviteController(inviteService, jwtService)
+    paymentService <- ZIO.service[PaymentService]
+  } yield new InviteController(inviteService, jwtService, paymentService)
 }
 
 object InviteRepositoryDemo extends ZIOAppDefault {

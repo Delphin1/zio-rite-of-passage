@@ -12,7 +12,7 @@ import com.tsgcompany.reviewboard.repositories.{InviteRepository, InviteReposito
 
 
 class InviteController private (inviteService: InviteService, jwtService: JWTService, paymentService: PaymentService) extends BaseController with InviteEndpoints {
-  val addPack =
+  val addPack: ServerEndpoint[Any, Task] =
     addPackEndpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
       .serverLogic { token => req =>
@@ -22,7 +22,7 @@ class InviteController private (inviteService: InviteService, jwtService: JWTSer
           .either
       }
 
-  val invite =
+  val invite: ServerEndpoint[Any, Task] =
     inviteEndpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
       .serverLogic { token =>
@@ -36,7 +36,7 @@ class InviteController private (inviteService: InviteService, jwtService: JWTSer
             .either
       }
 
-  val getByUserId =
+  val getByUserId: ServerEndpoint[Any, Task] =
     getByUserIdEndpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
       .serverLogic { token =>
@@ -44,7 +44,7 @@ class InviteController private (inviteService: InviteService, jwtService: JWTSer
           inviteService.getByUserName(token.email).either
       }
 
-  val addPackPromoted =
+  val addPackPromoted: ServerEndpoint[Any, Task] =
     addPackPromotedEndpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
       .serverLogic{ token => req =>
@@ -58,7 +58,12 @@ class InviteController private (inviteService: InviteService, jwtService: JWTSer
         .either
       }
 
-  override val routes: List[ServerEndpoint[Any, Task]] = List(addPack, addPackPromoted, getByUserId, invite)
+  val webhook: ServerEndpoint[Any, Task] =
+    webhookEndpoint
+      .serverLogic{ (signature, payload) =>
+        paymentService.handleWebhookEvent(signature, payload, packId => inviteService.activatePack(packId.toLong)).unit.either
+      }
+  override val routes: List[ServerEndpoint[Any, Task]] = List(addPack, addPackPromoted, webhook, getByUserId, invite)
 }
 
 object InviteController {

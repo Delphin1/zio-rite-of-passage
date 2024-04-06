@@ -9,6 +9,7 @@ trait InviteService {
   def getByUserName(userName: String): Task[List[InviteNamedRecord]]
   def sendInvites(userName: String, companyId: Long, receivers: List[String]): Task[Int]
   def addInvitePack(userName: String, companyId: Long): Task[Long]
+  def activatePack(id: Long): Task[Boolean]
 }
 
 class InviteServiceLive private (
@@ -32,8 +33,6 @@ class InviteServiceLive private (
         case None => inviteRepo.addInvitePack(userName, companyId, config.nInvites)
         case Some(_) => ZIO.fail(new RuntimeException("You already have an active pack for this company"))
       }
-      // TODO Remove after implementing payment process
-      _ <- inviteRepo.activatePack(newPackId)
     } yield newPackId
 
 
@@ -48,6 +47,9 @@ class InviteServiceLive private (
           .map(receiver => emailService.sendReviewInvite(userName, receiver, company))
       )
     } yield 0
+    
+  override def activatePack(id: Long): Task[Boolean] =
+    inviteRepo.activatePack(id)  
 
 
 }

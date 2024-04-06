@@ -66,6 +66,16 @@ trait InviteEndpoints extends BaseEndpoint {
       .out(stringBody) // this is the Stripe checkout URL
 
   // webhook - will be called automatically by Stripe
+  val webhookEndpoint =
+    baseEndpoint
+      .tag("Invites")
+      .name("invite webhook")
+      .description("Confirm the purchase of an invite pack")
+      .in("invite" / "webhook")
+      .post
+      .in(header[String]("Stripe-signature"))
+      .in(stringBody)
+
 
   /**
    * hit /invite/promoted -> Stipe checkout URL

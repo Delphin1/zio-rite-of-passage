@@ -2,14 +2,17 @@ package com.tsgcompany.reviewboard.services
 
 import com.stripe.model.checkout.*
 import com.stripe.Stripe as TheStripe
+import com.stripe.net.Webhook
 import com.stripe.param.checkout.SessionCreateParams
 import com.tsgcompany.reviewboard.config.{Configs, StripeConfig}
+import scala.jdk.OptionConverters.*
 import zio.*
 
 trait PaymentService {
   // create session
   def createCheckoutSession(invitePackId: Long, userName: String): Task[Option[Session]]
   // handle a webhook event
+  def handleWebhookEvent[A](signature: String, payload:String, action: String => Task[A]): Task[Option[A]]
 
 
 }
@@ -52,8 +55,37 @@ class PaymentServiceLive private (config: StripeConfig) extends PaymentService {
       .catchSome{
         case _ => ZIO.none
       }
-
+  override def handleWebhookEvent[A](signature: String, payload:String, action: String => Task[A]): Task[Option[A]] =
+    ZIO.attempt {
+      /**
+       * Build the webhook event
+       * check the event type
+       * if event type is successful
+       *    parse the event
+       *    then activate the pack
+       */
+      Webhook.constructEvent(payload, signature, config.secret)
+    }
+    .flatMap { event =>
+        event.getType() match {
+          case "checkout.session.completed" =>
+            ZIO.foreach(
+              event
+                .getDataObjectDeserializer()
+                .getObject()
+                .toScala
+                .map(_.asInstanceOf[Session])
+                .map(_.getClientReferenceId())
+            ) (action)
+            //    parse the event
+            //    then activate the pack
+          case _ =>
+            ZIO.none // discard the event
+        }
+      }
 }
+
+
 
 object  PaymentServiceLive {
   val layer = ZLayer {

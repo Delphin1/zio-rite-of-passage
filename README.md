@@ -45,7 +45,7 @@ insert into invites(id, user_name, company_id, n_invites, active) values (1, 'ts
 
 ```
 
-### Test invites
+### Test invites (just for local testing)
 export TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaXNzIjoidHNnY29tcGFueS5jb20iLCJleHAiOjE3MTI1MDcxMjEsImlhdCI6MTcxMjQyMDcyMSwidXNlcm5hbWUiOiJ0c2dAdHNnY29tcGFueS5jb20ifQ.6q_P--EnneNiE-2jPCT52lC766Obwgo-ad1oQd-SD_rjvjZ_Qh_b1cVDcJPR-1Szz_B9rT9Jp1LgfN49DHg8Xw
 
 http post localhost:8080/invite/add companyId=1 "Authorization: Bearer $TOKEN"
@@ -57,3 +57,7 @@ http post localhost:8080/invite companyId=1 emails:='["mail1@tsgcompany.com", "m
 
 ### Test promoted invites
 http post localhost:8080/invite/promoted companyId=1 "Authorization: Bearer $TOKEN"
+
+### Get Stripe secret
+stripe listen --forward-to http://localhost:8080/invite/webhook
+whsec_64c78cf3330cc8cc2d988b00e9858a0b113c7ee5142593bc84865ee6913148c4

@@ -5,12 +5,14 @@ import com.raquo.laminar.api.L.{child, *, given}
 import com.tsgcompany.reviewboard.common.Constants
 import com.tsgcompany.reviewboard.components.*
 import com.tsgcompany.reviewboard.core.*
+import com.tsgcompany.reviewboard.core.ZJS.*
 import zio.*
 import org.scalajs.dom
 
 import java.time.Instant
 import com.tsgcompany.reviewboard.domain.data.*
 import com.tsgcompany.reviewboard.core.ZJS.*
+import com.tsgcompany.reviewboard.http.requests.InvitePackRequest
 
 
 
@@ -26,11 +28,11 @@ object CompanyPage {
   //reactive variables
   val fetchCompanyBus = EventBus[Option[Company]]()
   val triggerRefreshBus = EventBus[Unit]()
-
   val status = fetchCompanyBus.events.scanLeft(Status.LOADING) ( (_,maybeCompany) => maybeCompany match {
     case None => Status.NOT_FOUND
     case Some(company) => Status.OK(company)
   })
+  val inviteErrorBus = EventBus[String]()
 
 
   def renderCompanySummary =
@@ -177,32 +179,8 @@ object CompanyPage {
         )
         .map(_.toList),
       children <-- reviewsSignal.map(_.map(renderReview)),
-      //dummyReviews.map(renderStaticReview),
-      div(
-        cls := "container",
-        div(
-          cls := "rok-last",
-          div(
-            cls := "row invite-row",
-            div(
-              cls := "col-md-6 col-sm-6 col-6",
-              span(
-                cls := "rock-apply",
-                p("Do you represent this company?"),
-                p("Invite people to leave reviews.")
-              )
-            ),
-            div(
-              cls := "col-md-6 col-sm-6 col-6",
-              a(
-                href := company.url,
-                target := "blank",
-                button(`type` := "button", cls := "rock-action-btn", "Invite people")
-              )
-            )
-          )
-        )
-      )
+      //dummyReviews.map(renderStaticReview)
+      child.maybe <-- Session.userState.signal.map(_.map(_ => renderInviteAction(company)))
     )
   )
 
@@ -216,6 +194,43 @@ object CompanyPage {
           case e: dom.html.Element => foreignHtmlElement(e)
           case _ => emptyNode
         }
+    )
+
+  def startPaymentFlow(companyId: Long) =
+    useBackend(_.invite.addPackPromotedEndpoint(InvitePackRequest(companyId)))
+      .tapError(e => ZIO.succeed(inviteErrorBus.emit(e.getMessage())))
+      .emitTo(Router.externalUrlBus)
+  def renderInviteAction(company: Company) =
+    div(
+      cls := "container",
+      div(
+        cls := "rok-last",
+        div(
+          cls := "row invite-row",
+          div(
+            cls := "col-md-6 col-sm-6 col-6",
+            span(
+              cls := "rock-apply",
+              p("Do you represent this company?"),
+              p("Invite people to leave reviews.")
+            )
+          ),
+          div(
+            cls := "col-md-6 col-sm-6 col-6",
+              button(`type` := "button",
+                cls := "rock-action-btn",
+                "Invite people",
+                disabled <-- inviteErrorBus.events.mapTo(true).startWith(false),
+                onClick.mapToUnit --> (_ => startPaymentFlow(company.id))
+              ),
+            div(
+              child.text <-- inviteErrorBus.events
+            )
+
+          )
+        )
+      )
+
     )
 
 }

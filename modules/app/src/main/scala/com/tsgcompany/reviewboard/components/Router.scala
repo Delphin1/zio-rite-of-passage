@@ -5,8 +5,10 @@ import org.scalajs.dom
 import frontroute.*
 import com.tsgcompany.reviewboard.pages.*
 object Router {
+  val externalUrlBus = EventBus[String]()
   def apply() =
     mainTag(
+      onMountCallback(ctx => externalUrlBus.events.foreach(url => dom.window.location.href = url)(ctx.owner)),
       routes(
         div(
           cls := "container-fluid",
@@ -20,8 +22,8 @@ object Router {
           path("signup") {
             SignupPage()
           },
-          path("profile") {
-            ProfilePage()
+          path("changepassword") {
+            ChangePasswordPage()
           },
           path("forgot") {
             ForgotPasswordPage()
@@ -31,6 +33,9 @@ object Router {
           },
           path("logout") {
             LogoutPage()
+          },
+          path("profile") {
+            ProfilePage()
           },
           path("post") {
             CreateCompanyPage()

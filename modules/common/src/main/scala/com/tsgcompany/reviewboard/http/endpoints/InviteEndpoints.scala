@@ -6,6 +6,7 @@ import sttp.tapir.generic.auto.*
 import com.tsgcompany.reviewboard.http.requests.*
 import com.tsgcompany.reviewboard.http.responses.*
 import com.tsgcompany.reviewboard.domain.data.*
+
 trait InviteEndpoints extends BaseEndpoint {
   /**
    * POST /invite/add

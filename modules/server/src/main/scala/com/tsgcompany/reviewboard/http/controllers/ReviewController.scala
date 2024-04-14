@@ -1,14 +1,15 @@
 package com.tsgcompany.reviewboard.http.controllers
 
-import com.tsgcompany.reviewboard.domain.data.UserId
-import sttp.tapir.server.ServerEndpoint
+import com.tsgcompany.reviewboard.domain.data.*
+import com.tsgcompany.reviewboard.http.endpoints.ReviewEndpoints
+import com.tsgcompany.reviewboard.services.*
+import sttp.tapir.server.*
 import zio.*
-import com.tsgcompany.reviewboard.services.{JWTService, ReviewService}
-import com.tsgcompany.reviewboard.http.endpoints.*
 
 
-class ReviewController private(reviewService: ReviewService, jwtService: JWTService) extends BaseController with ReviewEndpoints {
 
+class ReviewController (reviewService: ReviewService, jwtService: JWTService) extends BaseController with ReviewEndpoints {
+  
   val create: ServerEndpoint[Any, Task] =
     createEnpoint
       .serverSecurityLogic[UserId, Task](token => jwtService.verifyToken(token).either)
@@ -19,9 +20,15 @@ class ReviewController private(reviewService: ReviewService, jwtService: JWTServ
 
   val getByCompanyId: ServerEndpoint[Any, Task] =
     getByCompanyIdEnpoint.serverLogic(companyId => reviewService.getByCompanyId(companyId).either)
+    
+  val getSummary: ServerEndpoint[Any, Task] = 
+    getSummaryEndpoint.serverLogic(companyId => reviewService.getSummary(companyId).either)
+
+  val makeSummary: ServerEndpoint[Any, Task] = 
+    makeSummaryEndpoint.serverLogic(companyId => reviewService.makeSummary(companyId).either)
 
   override val routes: List[ServerEndpoint[Any, Task]] =
-    List(create, getById, getByCompanyId)
+    List(getSummary, makeSummary, create,  getById, getByCompanyId)
 }
 
 object ReviewController {

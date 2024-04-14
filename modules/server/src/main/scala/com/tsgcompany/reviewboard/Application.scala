@@ -46,3 +46,15 @@ object Application extends ZIOAppDefault {
   ) // Console.printLine("Hello world!")
 
 }
+
+/**
+ * - ReviewEndpoints - get/se (summaries)
+ * - controller
+ * - ReviewService
+ *    - get - fetch it from the repo
+ *    - set - invoke the OpenAI API + store in th repo
+ * - repo
+ *
+ * Frontend
+ * - modify the current "TODO" card
+*/

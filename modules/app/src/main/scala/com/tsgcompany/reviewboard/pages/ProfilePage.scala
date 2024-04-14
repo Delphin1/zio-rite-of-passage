@@ -2,7 +2,7 @@ package com.tsgcompany.reviewboard.pages
 
 import com.raquo.laminar.api.L.{*, given}
 import com.tsgcompany.reviewboard.common.*
-import com.tsgcompany.reviewboard.components.Anchors
+import com.tsgcompany.reviewboard.components.{Anchors, InviteActions}
 import com.tsgcompany.reviewboard.core.Session
 import zio.*
 import org.scalajs.dom
@@ -48,8 +48,9 @@ object ProfilePage {
         cls := "profile-section",
         h3(span("Account Settings")),
         Anchors.renderNavLink("Change Password", "/changepassword")
-      )
+      ),
       // actions section - send invite3s for every they have invites for
+      InviteActions()
     )
 
 }

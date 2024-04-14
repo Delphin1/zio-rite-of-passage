@@ -53,6 +53,13 @@ CREATE TABLE IF NOT EXISTS invites
     active BOOLEAN NOT NULL DEFAULT false
 );
 
+CREATE TABLE IF NOT EXISTS review_summaries
+(
+    company_id BIGINT NOT NULL PRIMARY KEY,
+    contents TEXT,
+    created TIMESTAMP NOT NULL DEFAULT now()
+);
+
 
 -- dummy data
 insert into companies(
@@ -70,6 +77,7 @@ industry
           'Novi Sad',
           'Serbia',
           'IT');
+
 
 insert into invites(id, user_name, company_id, n_invites, active) values (1, 'tsg@tsgcompany.com',1 ,10, true);
 

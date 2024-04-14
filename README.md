@@ -61,3 +61,7 @@ http post localhost:8080/invite/promoted companyId=1 "Authorization: Bearer $TOK
 ### Get Stripe secret
 stripe listen --forward-to http://localhost:8080/invite/webhook
 whsec_64c78cf3330cc8cc2d988b00e9858a0b113c7ee5142593bc84865ee6913148c4
+
+### Test reviews summary
+http get localhost:8080/reviews/company/1/summary
+

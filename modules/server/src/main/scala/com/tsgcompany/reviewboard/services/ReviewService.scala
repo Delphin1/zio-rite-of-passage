@@ -5,6 +5,8 @@ import zio.json.{DeriveJsonCodec, JsonCodec}
 import com.tsgcompany.reviewboard.domain.data.{Review, ReviewSummary}
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
 import com.tsgcompany.reviewboard.repositories.ReviewRepository
+import com.tsgcompany.reviewboard.config.*
+
 
 import java.time.Instant
 
@@ -18,7 +20,7 @@ trait ReviewService {
 
 }
 
-class ReviewServiceLive private (repo: ReviewRepository) extends ReviewService {
+class ReviewServiceLive private (repo: ReviewRepository, openAIService: OpenAIService, config: SummaryConfig) extends ReviewService {
 
   override def create(request: CreateReviewRequest, userId: Long): Task[Review] =
     repo.create(
@@ -50,12 +52,53 @@ class ReviewServiceLive private (repo: ReviewRepository) extends ReviewService {
     repo.getSummary(companyId)
 
   override  def makeSummary(companyId: Long): Task[Option[ReviewSummary]] =
-    ZIO.fail(new RuntimeException("Not implemented"))
-    //repo.insertSummary()
+    getByCompanyId(companyId)
+      .flatMap(list => Random.shuffle(list))
+      .map(_.take(config.nSelected))
+      .flatMap { reviews =>
+        val currentSummary: Task[Option[String]] =
+          if (reviews.size < config.minReviews)
+            ZIO.succeed(Some(s"Need to have at least ${config.minReviews} reviews to generate a summary"))
+          else
+            buildPrompt(reviews).flatMap(openAIService.getCompletion)
+        currentSummary.flatMap{
+          case None => ZIO.none
+          case Some(summary) => repo.insertSummary(companyId, summary).map(Some(_))
+        }
+
+      }
+
+  private def buildPrompt(reviews: List[Review]): Task[String] = ZIO.succeed{
+    "You have the following reviews about a company:" +
+      reviews.zipWithIndex.map {
+        case (Review(_, _, _, management, culture, salary, benefits, wouldRecommend, review, _, _), index) =>
+          s"""
+            Review ${index + 1}:
+              Management: $management stars / 5,
+              Culture: $culture stars / 5
+              Salary: $salary stars / 5
+              Benefits: $benefits stars / 5
+              Net promoter score: $wouldRecommend stars / 5
+              Content: "$review"
+           """
+          .mkString("\n") +
+          "Make a summary of all these reviews in at most one paragraph."
+      }
+    }
+
+
 }
 
 object ReviewServiceLive {
   val layer = ZLayer {
-    ZIO.service[ReviewRepository].map(repo => new ReviewServiceLive(repo))
+    for {
+      repo <- ZIO.service[ReviewRepository]
+      openAIService <- ZIO.service[OpenAIService]
+      config <- ZIO.service[SummaryConfig]
+    } yield new ReviewServiceLive(repo, openAIService, config)
   }
+  val configuredLayer =
+    Configs.makeConfigLayer[SummaryConfig]("tsgcompany.summaries") >>> layer
 }
+
+

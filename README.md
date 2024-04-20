@@ -64,4 +64,7 @@ whsec_64c78cf3330cc8cc2d988b00e9858a0b113c7ee5142593bc84865ee6913148c4
 
 ### Test reviews summary
 http get localhost:8080/reviews/company/1/summary
+http post localhost:8080/reviews/company/1/summary
+
+
 

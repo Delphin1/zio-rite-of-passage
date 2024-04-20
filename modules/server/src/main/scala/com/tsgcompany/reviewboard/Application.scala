@@ -34,7 +34,7 @@ object Application extends ZIOAppDefault {
     EmailServiceLive.configuredLayer,
     InviteServiceLive.configredLayer,
     PaymentServiceLive.configuredLayer,
-    OpenAIServiceLive.layer,
+    OpenAIServiceLive.configuredLayer,
     //repos
     CompanyRepositoryLive.layer,
     ReviewRepositoryLive.layer,

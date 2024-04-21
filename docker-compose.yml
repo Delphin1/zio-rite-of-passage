@@ -4,9 +4,9 @@ services:
   db:
     image: postgres
     restart: always
-    volumes:
-      - ./sql:/docker-entrypoint-initdb.d
-      - ./.data:/var/lib/postgresql/data
+#    volumes:
+#      - ./sql:/docker-entrypoint-initdb.d
+#      - ./.data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=docker
       - POSTGRES_PASSWORD=docker

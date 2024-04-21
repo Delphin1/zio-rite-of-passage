@@ -1,5 +1,6 @@
 package com.tsgcompany.reviewboard.core
 
+import com.tsgcompany.reviewboard.common.Constants
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.*
@@ -7,7 +8,6 @@ import sttp.client3.impl.zio.FetchZioBackend
 import sttp.tapir.Endpoint
 import sttp.tapir.client.sttp.SttpClientInterpreter
 import zio.*
-
 import com.tsgcompany.reviewboard.config.*
 import com.tsgcompany.reviewboard.http.endpoints.*
 
@@ -63,6 +63,8 @@ object BackendClientLive {
   val layer = ZLayer {
     for {
       backend <- ZIO.service[SttpBackend[Task, ZioStreams & WebSockets]]
+
+
       interpreter <- ZIO.service[SttpClientInterpreter]
       config <- ZIO.service[BackendClientConfig]
     } yield new BackendClientLive(backend, interpreter, config)
@@ -71,7 +73,7 @@ object BackendClientLive {
   val configuredLayer = {
     val backend = FetchZioBackend()
     val interpreter: SttpClientInterpreter = SttpClientInterpreter()
-    val config = BackendClientConfig(Some(uri"http://localhost:8080"))
+    val config = BackendClientConfig(Some(uri"${Constants.backendBaseUrl}"))
     ZLayer.succeed(backend) ++ 
       ZLayer.succeed(interpreter) ++ 
       ZLayer.succeed(config) >>> layer

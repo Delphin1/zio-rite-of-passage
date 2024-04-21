@@ -7,13 +7,13 @@ import zio.*
 import java.util.Properties
 import javax.mail.internet.MimeMessage
 import javax.mail.{Authenticator, Message, PasswordAuthentication, Session, Transport}
-trait EmailService {
+trait EmailService (baseUrl: String) {
   def sendEmail(to: String, subject: String, content: String): Task[Unit]
-  def sendPasswordRecovery(to: String, token: String): Task[Unit]
-  def sendReviewInvite(from: String, to: String, company: Company): Task[Unit]
+  def sendPasswordRecovery(to: String, token: String, baseUrl: String = baseUrl): Task[Unit]
+  def sendReviewInvite(from: String, to: String, company: Company, baseUrl: String = baseUrl): Task[Unit]
 }
 
-class EmailServiceLive private (config: EmailServiceConfig) extends EmailService {
+class EmailServiceLive private (config: EmailServiceConfig) extends EmailService(config.baseUrl) {
   private val host: String = config.host
   private val port: Int = config.port
   private val user: String = config.user
@@ -27,7 +27,7 @@ class EmailServiceLive private (config: EmailServiceConfig) extends EmailService
 
     } yield message
     messageZIO.map(message => Transport.send(message))
-  override def sendPasswordRecovery(to: String, token: String): Task[Unit] = {
+  override def sendPasswordRecovery(to: String, token: String, baseUrl: String): Task[Unit] = {
     val subject = "This is password recovery"
     val content =
       s"""
@@ -40,6 +40,10 @@ class EmailServiceLive private (config: EmailServiceConfig) extends EmailService
          |">
          |<h1>TSG Company password recovery</h1>
          |<p>Your password recovery token is:<strong>$token</strong></p>
+         |<p>
+         |  Go
+         |  <a href="$baseUrl/recover"> here </a>
+         |  to reset your passoword
          |</div>
          |""".stripMargin
     sendEmail(to, subject, content)
@@ -72,7 +76,7 @@ class EmailServiceLive private (config: EmailServiceConfig) extends EmailService
     ZIO.succeed(message)
   }
   
-  override def sendReviewInvite(from: String, to: String, company: Company): Task[Unit] = {
+  override def sendReviewInvite(from: String, to: String, company: Company, baseUrl: String): Task[Unit] = {
     val subject = s"Invitation to Review ${company.name}"
     val content: String =
       s"""
@@ -86,7 +90,7 @@ class EmailServiceLive private (config: EmailServiceConfig) extends EmailService
         |<h1>You are invited to review ${company.name}</h1>
         |<p>
         |Go to
-        |<a href="http://localhost:1234/company/${company.id}">this link</a>
+        |<a href="$baseUrl/company/${company.id}">this link</a>
         |to add your thoughts on the app. Should take just a minute.
         |</p>
         |</div>

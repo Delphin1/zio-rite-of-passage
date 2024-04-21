@@ -8,6 +8,7 @@ trait BaseEndpoint {
     .errorOut(statusCode and plainBody[String]) // (StatusCode, String)
     //    .mapErrorOut(/* (StatusCode, Sting) => MyHttpError */)(/* MyHttpError => (StatusCode, String) */)
     .mapErrorOut[Throwable](HttpError.decode)(HttpError.encode)
+    .prependIn("api")
 
   val secureBaseEndpoint =
     baseEndpoint

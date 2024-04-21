@@ -1,5 +1,6 @@
 package com.tsgcompany.reviewboard
 
+import com.tsgcompany.reviewboard.config.{Configs, HttpConfig}
 import com.tsgcompany.reviewboard.http.HttpApi
 import com.tsgcompany.reviewboard.repositories.*
 import com.tsgcompany.reviewboard.repositories.Repository.dataLayer
@@ -8,8 +9,16 @@ import sttp.tapir.*
 import sttp.tapir.server.interceptor.cors.CORSInterceptor
 import sttp.tapir.server.ziohttp.*
 import zio.*
-import zio.http.Server
+import zio.http.{Server, ServerConfig}
+
+import java.net.InetSocketAddress
 object Application extends ZIOAppDefault {
+
+  val configuredServer = Configs.makeConfigLayer[HttpConfig]("tsgcompany.http") >>>
+    ZLayer(
+      ZIO.service[HttpConfig]
+        .map(config => ServerConfig.default.copy(address = InetSocketAddress(config.port)))
+    ) >>> Server.live
 
   val serverProgram = for {
     endpoints <- HttpApi.endpointsZIO
@@ -24,7 +33,7 @@ object Application extends ZIOAppDefault {
   } yield ()
 
   override def run  = serverProgram.provide(
-    Server.default,
+    configuredServer,
     // configs
     // services
     CompanyServiceLive.layer,

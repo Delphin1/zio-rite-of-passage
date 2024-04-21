@@ -66,5 +66,11 @@ whsec_64c78cf3330cc8cc2d988b00e9858a0b113c7ee5142593bc84865ee6913148c4
 http get localhost:8080/reviews/company/1/summary
 http post localhost:8080/reviews/company/1/summary
 
+### sbt commands
+stagingBuild / Docker / publishLocal
+
+docker save -o server.tar rockthejvm-reviewboard-staging:1.0.1
+scp server.tar root@139.59.146.144:/staging
+docker load -i server.tar
 
 

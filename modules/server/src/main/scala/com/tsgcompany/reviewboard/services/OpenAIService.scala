@@ -51,10 +51,10 @@ object OpenAIServiceLive {
     } yield new  OpenAIServiceLive(backend, interpreter, config)
   }
 
-val configuredLayer =
-  HttpClientZioBackend.layer() >+>
-    ZLayer.succeed(SttpClientInterpreter()) >+>
-    Configs.makeConfigLayer[OpenAIConfig]("tsgcompany.openai") >>> layer
+  val configuredLayer =
+    HttpClientZioBackend.layer() >+>
+      ZLayer.succeed(SttpClientInterpreter()) >+>
+      Configs.makeConfigLayer[OpenAIConfig]("tsgcompany.openai") >>> layer
 
 }
 

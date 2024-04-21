@@ -1,4 +1,4 @@
-ThisBuild / version      := "0.1.0-SNAPSHOT"
+ThisBuild / version      := "1.0.1"
 ThisBuild / scalaVersion := "3.3.0"
 ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
@@ -98,3 +98,17 @@ lazy val root = (project in file("."))
   )
   .aggregate(server, app)
   .dependsOn(server, app)
+
+
+
+lazy val stagingBuild = (project in (file("build/staging")))
+  .enablePlugins(JavaAppPackaging, DockerPlugin)
+  .settings(
+    dockerBuildOptions += "--platform=linux/amd64",
+    name            := "rockthejvm-reviewboard-staging",
+    dockerBaseImage := "openjdk:21-slim-buster", // can use a different JDK
+    dockerExposedPorts ++= Seq(4041),
+    Compile / mainClass         := Some("com.tsgcompany.reviewboard.Application"),
+    Compile / resourceDirectory := ((server / Compile / resourceDirectory).value)
+  )
+  .dependsOn(server)

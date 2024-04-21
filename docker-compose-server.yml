@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env-pg
+    ports:
+      - "5432:5432"
+#    volumes:
+#      - "./sql:/docker-entrypoint-initdb.d"
+
+  server:
+    image: rockthejvm-reviewboard-staging:1.0.1
+    restart: always
+    ports:
+      - "4041:4041"
+    env_file:
+      - .env-server

@@ -1,11 +1,12 @@
 package com.tsgcompany.reviewboard.services
 
 
+import com.tsgcompany.reviewboard.config.SummaryConfig
 import zio.*
 import zio.test.*
 
 import java.time.Instant
-import com.tsgcompany.reviewboard.domain.data.Review
+import com.tsgcompany.reviewboard.domain.data.{Review, ReviewSummary}
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
 import com.tsgcompany.reviewboard.repositories.ReviewRepository
 import com.tsgcompany.reviewboard.services.{ReviewService, ReviewServiceLive}
@@ -72,7 +73,23 @@ object ReviewServiceSpec extends ZIOSpecDefault {
 
       override def delete(id: Long): Task[Review] =
         getById(id).someOrFail(new RuntimeException(s"id $id not found "))
+
+      override def getSummary(companyId: Long): Task[Option[ReviewSummary]] = ZIO.none
+
+      override def insertSummary(companyId: Long, summary: String): Task[ReviewSummary] =
+        ZIO.succeed(ReviewSummary(companyId, summary, Instant.now()))
     }
+  }
+
+  val stubRewviewSummaryService = ZLayer.succeed {
+    new OpenAIService {
+      override def getCompletion(prompt: String): Task[Option[String]] =
+        ZIO.none
+    }
+  }
+
+  val summaryConfigLayyer = ZLayer.succeed {
+    SummaryConfig(3, 20)
   }
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
@@ -137,6 +154,8 @@ object ReviewServiceSpec extends ZIOSpecDefault {
       }
     ).provide(
       ReviewServiceLive.layer,
-      stubRepoLayer
+      stubRepoLayer,
+      stubRewviewSummaryService,
+      summaryConfigLayyer
     )
 }

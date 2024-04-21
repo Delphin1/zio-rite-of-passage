@@ -70,19 +70,26 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post New Company"
             if (isRequired) span("*") else span(),
             name
           ),
-          input(
-            `type` := "file",
-            cls := "form-control",
-            idAttr := uid,
-            accept := "image/*",
-            onChange.mapToFiles --> (files => ())
+          div (
+            cls := "image-upload",
+            input(
+              `type` := "file",
+              cls := "form-control",
+              idAttr := uid,
+              accept := "image/*",
+              onChange.mapToFiles --> (files => ())
+            ),
+            img (
+              cls := "image-upload-thumbnail",
+              src <-- stateVar.signal.map(_.image.getOrElse(Constants.companyLogoPlaceholder))
+            )
           )
         )
       )
     )
 
   private def computeDimensions(width: Int, height: Int): (Int, Int) =
-    if (width > height) {
+    if (width >= height) {
       val ratio = width * 1.0 / 256
       val newW = width / ratio
       val newH = height / ratio

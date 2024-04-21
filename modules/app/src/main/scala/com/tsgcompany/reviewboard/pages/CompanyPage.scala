@@ -178,12 +178,31 @@ object CompanyPage {
       cls := "container-fluid the-rock",
       onMountCallback((_ => useBackend(_.company.getByIdEndpoint(id.toString)).emitTo(fetchCompanyBus))),
       children <-- status.map {
-        case Status.LOADING => List(div("loading..."))
-        case Status.NOT_FOUND =>  List(div("company not found"))
+        case Status.LOADING => renderLoadgin
+        case Status.NOT_FOUND =>  renderNotFound
         case Status.OK(company) => render(company, reviewsSignal(id))
       },
       //child <-- reviewsSignal(id).map(_.toString)
     )
+
+  def renderLoadgin = List(
+    div(
+      cls := "simple-titled-page",
+      h1("Loading.."),
+    )
+  )
+
+  def renderNotFound = List(
+    div(
+      cls := "simple-titled-page",
+      h1("Company not found"),
+      h2("This company doesn't exist"),
+      a(
+        href := "/",
+        "Maybe check the list of companies again?"
+      )
+    )
+  )
 
   def render(company: Company, reviewsSignal: Signal[List[Review]]) = List(
     div(

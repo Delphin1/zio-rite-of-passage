@@ -59,3 +59,11 @@ object Application extends ZIOAppDefault {
  * Frontend
  * - modify the current "TODO" card
 */
+
+/**
+ * - tests work
+ * - reviews are set int future (TZ diff)
+ * - invalid pages
+ * - footer
+ * - some images won't upload in company pages
+*/

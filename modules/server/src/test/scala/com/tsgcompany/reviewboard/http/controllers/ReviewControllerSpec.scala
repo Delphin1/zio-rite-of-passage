@@ -12,7 +12,7 @@ import zio.test.*
 import zio.json.*
 
 import java.time.Instant
-import com.tsgcompany.reviewboard.domain.data.{Review, User, UserId, UserToken}
+import com.tsgcompany.reviewboard.domain.data.{Review, ReviewSummary, User, UserId, UserToken}
 import com.tsgcompany.reviewboard.http.requests.CreateReviewRequest
 import com.tsgcompany.reviewboard.services.{JWTService, ReviewService}
 import com.tsgcompany.reviewboard.services.UserServiceSpec.tsgUser
@@ -75,6 +75,13 @@ object ReviewControllerSpec extends ZIOSpecDefault {
         if (userId == 1L) List(goodReview)
         else List()
       }
+
+    override def getSummary(companyId: Long): Task[Option[ReviewSummary]] = 
+      ZIO.none
+
+    override def makeSummary(companyId: Long): Task[Option[ReviewSummary]] =
+      ZIO.none
+
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("ReviewControllerSpec")(

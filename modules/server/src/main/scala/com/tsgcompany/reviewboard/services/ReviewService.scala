@@ -22,7 +22,13 @@ trait ReviewService {
 
 class ReviewServiceLive private (repo: ReviewRepository, openAIService: OpenAIService, config: SummaryConfig) extends ReviewService {
 
-  override def create(request: CreateReviewRequest, userId: Long): Task[Review] =
+  override def create(request: CreateReviewRequest, userId: Long): Task[Review] = {
+    ZIO.log(
+    s"""
+        Creating review at instant:
+          - instant.now: ${Instant.now()}
+          - absolute millis: ${Instant.now().toEpochMilli()}
+        """) *>
     repo.create(
       Review(
           id = -1L,
@@ -38,6 +44,7 @@ class ReviewServiceLive private (repo: ReviewRepository, openAIService: OpenAISe
           updated = Instant.now(),
       )
     )
+  }
 
   override def getById(id: Long): Task[Option[Review]] =
     repo.getById(id)
